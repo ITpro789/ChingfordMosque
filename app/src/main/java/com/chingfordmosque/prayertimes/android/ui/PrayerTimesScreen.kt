@@ -41,6 +41,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -198,6 +199,17 @@ private fun CountdownHero(
                     color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
                     fontWeight = FontWeight.Medium,
                 )
+
+                val hijri = remember { HijriDate.today() }
+                if (hijri != null) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = hijri,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
+                        fontWeight = FontWeight.Medium,
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(20.dp))
 

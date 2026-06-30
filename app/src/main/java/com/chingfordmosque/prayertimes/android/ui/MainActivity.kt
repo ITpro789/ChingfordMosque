@@ -6,9 +6,15 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.core.content.ContextCompat
+import com.chingfordmosque.prayertimes.android.PrayerTimesApp
+import com.chingfordmosque.prayertimes.android.settings.ThemeMode
 import com.chingfordmosque.prayertimes.android.ui.theme.ChingfordMosqueTheme
 
 /**
@@ -28,11 +34,21 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        enableEdgeToEdge()
+
         maybeRequestNotificationPermission()
 
+        val settingsRepository = (application as PrayerTimesApp).settingsRepository
+
         setContent {
-            ChingfordMosqueTheme {
-                PrayerTimesRoute(viewModel = viewModel)
+            val themeMode by settingsRepository.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
+            val darkTheme = when (themeMode) {
+                ThemeMode.SYSTEM -> isSystemInDarkTheme()
+                ThemeMode.LIGHT -> false
+                ThemeMode.DARK -> true
+            }
+            ChingfordMosqueTheme(darkTheme = darkTheme) {
+                MainScaffold(prayerViewModel = viewModel)
             }
         }
     }

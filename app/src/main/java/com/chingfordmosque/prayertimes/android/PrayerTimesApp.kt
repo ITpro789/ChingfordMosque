@@ -6,6 +6,7 @@ import com.chingfordmosque.prayertimes.android.platform.AndroidNotificationPermi
 import com.chingfordmosque.prayertimes.android.platform.AndroidNotificationPermissionPrompt
 import com.chingfordmosque.prayertimes.android.platform.OkHttpFetcher
 import com.chingfordmosque.prayertimes.android.platform.PrefsLocalStore
+import com.chingfordmosque.prayertimes.android.settings.SettingsRepository
 import com.chingfordmosque.prayertimes.app.AppContainer
 import com.chingfordmosque.prayertimes.domain.SystemClock
 
@@ -29,6 +30,10 @@ class PrayerTimesApp : Application() {
     /** Activity-observed holder used to drive the runtime permission request from the UI. */
     val permissionPrompt: AndroidNotificationPermissionPrompt = AndroidNotificationPermissionPrompt()
 
+    /** Persisted user settings (notification toggles, adhan sound, theme). */
+    lateinit var settingsRepository: SettingsRepository
+        private set
+
     lateinit var container: AppContainer
         private set
 
@@ -38,6 +43,8 @@ class PrayerTimesApp : Application() {
 
         Notifications.createAdhanChannel(this)
 
+        settingsRepository = SettingsRepository(this)
+
         container = AppContainer(
             clock = SystemClock(),
             store = PrefsLocalStore(this),
@@ -46,6 +53,12 @@ class PrayerTimesApp : Application() {
             permissionPrompt = permissionPrompt,
             httpFetcher = OkHttpFetcher(),
         )
+
+        // Apply the user's saved notification preferences before any schedule is armed, so the
+        // first reschedule (during onAppOpened) already honours them. A synchronous read here
+        // mirrors how PrefsLocalStore loads the cached schedule.
+        val saved = settingsRepository.readBlocking()
+        container.notificationScheduler.setPreferences(saved.toNotificationPreferences())
     }
 
     companion object {
