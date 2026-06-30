@@ -1,8 +1,47 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
 }
+
+// ---------------------------------------------------------------------------
+// Release signing configuration.
+//
+// The release upload key is resolved from one of two sources, in priority order:
+//   1. A gitignored `keystore.properties` at the repo root (local developer
+//      machines) with keys: storeFile, storePassword, keyAlias, keyPassword.
+//   2. Environment variables (CI secrets):
+//      CM_KEYSTORE_PATH, CM_KEYSTORE_PASSWORD, CM_KEY_ALIAS, CM_KEY_PASSWORD.
+//
+// If neither source provides a complete, valid keystore, the release build
+// transparently falls back to the debug signing config so that
+// assembleRelease / bundleRelease always succeed (useful for CI verification
+// builds). `releaseSigningReady` records which path was taken.
+// ---------------------------------------------------------------------------
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties = Properties().apply {
+    if (keystorePropertiesFile.exists()) {
+        FileInputStream(keystorePropertiesFile).use { load(it) }
+    }
+}
+
+fun resolveSigningValue(propKey: String, envKey: String): String? =
+    (keystoreProperties.getProperty(propKey) ?: System.getenv(envKey))?.takeIf { it.isNotBlank() }
+
+val cmStoreFilePath = resolveSigningValue("storeFile", "CM_KEYSTORE_PATH")
+val cmStorePassword = resolveSigningValue("storePassword", "CM_KEYSTORE_PASSWORD")
+val cmKeyAlias = resolveSigningValue("keyAlias", "CM_KEY_ALIAS")
+val cmKeyPassword = resolveSigningValue("keyPassword", "CM_KEY_PASSWORD")
+
+val resolvedStoreFile = cmStoreFilePath?.let { rootProject.file(it) }
+val releaseSigningReady =
+    resolvedStoreFile != null && resolvedStoreFile.exists() &&
+        !cmStorePassword.isNullOrBlank() &&
+        !cmKeyAlias.isNullOrBlank() &&
+        !cmKeyPassword.isNullOrBlank()
 
 android {
     namespace = "com.chingfordmosque.prayertimes.android"
@@ -12,8 +51,8 @@ android {
         applicationId = "com.chingfordmosque.prayertimes"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = (System.getenv("CM_VERSION_CODE")?.toInt() ?: 1)
+        versionName = (System.getenv("CM_VERSION_NAME") ?: "1.0.0")
     }
 
     buildFeatures {
@@ -26,9 +65,40 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    signingConfigs {
+        create("release") {
+            if (releaseSigningReady) {
+                storeFile = resolvedStoreFile
+                storePassword = cmStorePassword
+                keyAlias = cmKeyAlias
+                keyPassword = cmKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = if (releaseSigningReady) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
+            println(
+                if (releaseSigningReady) {
+                    "[ChingfordMosque] Release build signed with the real upload key (keystore.properties/env)."
+                } else {
+                    "[ChingfordMosque] No release keystore found; release build signed with the DEBUG key (fallback)."
+                }
+            )
+        }
+
+        debug {
         }
     }
 }

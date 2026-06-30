@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Legacy auto-backup rules (used on Android 11 / API 30 and below via
+  android:fullBackupContent). The app only persists lightweight user settings
+  via SharedPreferences and DataStore, both of which are safe to back up.
+-->
+<full-backup-content>
+    <include domain="sharedpref" path="." />
+    <include domain="file" path="datastore" />
+</full-backup-content>

@@ -12,3 +12,14 @@ local.properties
 
 # OS
 .DS_Store
+
+
+# Release signing (never commit keystores or their config)
+keystore.properties
+secrets/
+*.jks
+*.keystore
+upload.jks
+
+# Release bundles (Play upload artifacts)
+*.aab

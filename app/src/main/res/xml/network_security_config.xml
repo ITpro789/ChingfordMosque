@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The app communicates exclusively over HTTPS, so cleartext (plain HTTP)
+  traffic is disabled for all domains. This is enforced together with
+  android:usesCleartextTraffic="false" in the manifest.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>
