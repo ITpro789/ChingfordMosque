@@ -115,6 +115,7 @@ object NextPrayerPresenter {
             ringCaption = ringCaption,
             ringCountdown = ringCountdown,
             ringProgress = ringProgress,
+            isEstimated = state.isCalculated,
         )
 
     /**

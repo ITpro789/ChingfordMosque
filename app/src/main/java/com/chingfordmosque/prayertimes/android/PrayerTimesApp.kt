@@ -7,8 +7,16 @@ import com.chingfordmosque.prayertimes.android.platform.AndroidNotificationPermi
 import com.chingfordmosque.prayertimes.android.platform.OkHttpFetcher
 import com.chingfordmosque.prayertimes.android.platform.PrefsLocalStore
 import com.chingfordmosque.prayertimes.android.settings.SettingsRepository
+import com.chingfordmosque.prayertimes.android.work.RefreshWorker
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.chingfordmosque.prayertimes.app.AppContainer
+import com.chingfordmosque.prayertimes.data.provider.CalculatedTimesProvider
 import com.chingfordmosque.prayertimes.domain.SystemClock
+import java.util.concurrent.TimeUnit
 
 /**
  * The Android composition root. Builds the single [AppContainer] for the process, supplying the
@@ -52,6 +60,7 @@ class PrayerTimesApp : Application() {
             permission = AndroidNotificationPermission(this),
             permissionPrompt = permissionPrompt,
             httpFetcher = OkHttpFetcher(),
+            fallbackProvider = CalculatedTimesProvider(clock = SystemClock()),
         )
 
         // Apply the user's saved notification preferences before any schedule is armed, so the
@@ -59,6 +68,30 @@ class PrayerTimesApp : Application() {
         // mirrors how PrefsLocalStore loads the cached schedule.
         val saved = settingsRepository.readBlocking()
         container.notificationScheduler.setPreferences(saved.toNotificationPreferences())
+
+        enqueuePeriodicRefresh()
+    }
+
+    /**
+     * Enqueue a unique periodic background refresh (every 6 hours, requiring connectivity) so the
+     * cache stays fresh and adhan alarms are re-armed even if the user never opens the app.
+     * [ExistingPeriodicWorkPolicy.KEEP] means an already-scheduled job is left untouched across
+     * process restarts.
+     */
+    private fun enqueuePeriodicRefresh() {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val request = PeriodicWorkRequestBuilder<RefreshWorker>(6, TimeUnit.HOURS)
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "prayer-refresh",
+            ExistingPeriodicWorkPolicy.KEEP,
+            request,
+        )
     }
 
     companion object {

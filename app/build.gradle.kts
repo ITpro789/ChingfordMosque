@@ -62,4 +62,7 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+
+    // Background work scheduling (periodic refresh).
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
 }

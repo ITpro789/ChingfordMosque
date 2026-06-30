@@ -17,3 +17,4 @@ dependencyResolutionManagement {
 rootProject.name = "ChingfordMosque"
 include(":core")
 include(":app")
+include(":monitor")

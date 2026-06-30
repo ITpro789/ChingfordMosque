@@ -42,6 +42,13 @@ data class NextPrayerViewState(
     val ringCountdown: String? = null,
     /** Fraction (0f..1f) of the current/upcoming window that has elapsed. */
     val ringProgress: Float = 0f,
+    /**
+     * `true` when the displayed schedule is an on-device astronomical estimate (the calculated
+     * fallback) rather than the mosque's published times. Mirrors
+     * [com.chingfordmosque.prayertimes.refresh.RefreshState.isCalculated]; the binding can show
+     * an "estimated times" notice when set.
+     */
+    val isEstimated: Boolean = false,
 )
 
 /**

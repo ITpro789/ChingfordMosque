@@ -56,6 +56,7 @@ class NextPrayerPresenterTest : StringSpec({
         nextPrayer: PrayerTime? = null,
         timeUntilNext: Duration? = null,
         error: RefreshError? = null,
+        isCalculated: Boolean = false,
     ): RefreshState = RefreshState(
         schedule = Option.ofNullable(schedule),
         fetchedAt = Option.ofNullable(fetchedAt),
@@ -63,6 +64,7 @@ class NextPrayerPresenterTest : StringSpec({
         nextPrayer = Option.ofNullable(nextPrayer),
         timeUntilNext = Option.ofNullable(timeUntilNext),
         error = Option.ofNullable(error),
+        isCalculated = isCalculated,
     )
 
     // --- next-prayer name & countdown formatting (from precomputed state fields) ---
@@ -126,6 +128,18 @@ class NextPrayerPresenterTest : StringSpec({
     "stale flag is surfaced from the state" {
         NextPrayerPresenter.present(stateWith(isStale = true)).isStale shouldBe true
         NextPrayerPresenter.present(stateWith(isStale = false)).isStale shouldBe false
+    }
+
+    // --- estimated (calculated fallback) indicator ---
+
+    "isEstimated reflects state.isCalculated in present(state)" {
+        NextPrayerPresenter.present(stateWith(isCalculated = true)).isEstimated shouldBe true
+        NextPrayerPresenter.present(stateWith(isCalculated = false)).isEstimated shouldBe false
+    }
+
+    "isEstimated reflects state.isCalculated in present(state, now)" {
+        NextPrayerPresenter.present(stateWith(isCalculated = true), now = dt(13, 0)).isEstimated shouldBe true
+        NextPrayerPresenter.present(stateWith(isCalculated = false), now = dt(13, 0)).isEstimated shouldBe false
     }
 
     // --- error banner + retry (Reqs 8.1, 8.2, 8.3) ---

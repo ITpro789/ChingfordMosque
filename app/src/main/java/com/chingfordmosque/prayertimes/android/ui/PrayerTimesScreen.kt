@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
@@ -133,6 +134,10 @@ fun PrayerTimesScreen(
             CountdownHero(today = state.today, next = state.next)
 
             FreshnessStrip(next = state.next)
+
+            if (state.next.isEstimated) {
+                EstimatedNotice()
+            }
 
             state.next.errorBanner?.let { banner ->
                 ErrorBanner(banner = banner, onRetry = onRefresh)
@@ -379,6 +384,43 @@ private fun FreshnessStrip(next: NextPrayerViewState) {
                     disabledLabelColor = MaterialTheme.colorScheme.onTertiaryContainer,
                     disabledContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
                 ),
+            )
+        }
+    }
+}
+
+/**
+ * A tasteful amber notice shown when the displayed schedule is an on-device astronomical
+ * estimate (the calculated fallback) because the mosque site couldn't be reached or parsed.
+ * Sits just under the freshness strip; iqamah times read "—" in this mode since calculation
+ * cannot know the mosque's congregational times.
+ */
+@Composable
+private fun EstimatedNotice() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+        ),
+        shape = RoundedCornerShape(16.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Info,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = "Estimated times \u2014 couldn't reach the mosque site",
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Medium,
             )
         }
     }

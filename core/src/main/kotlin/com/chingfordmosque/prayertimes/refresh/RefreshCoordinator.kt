@@ -38,6 +38,11 @@ import com.chingfordmosque.prayertimes.service.ScheduleService
  * @param repository the cache that holds last-known-good data.
  * @param notificationScheduler re-armed with the latest schedule on every successful fetch.
  * @param clock supplies the current instant; never read from a system clock directly.
+ * @param fallbackProvider an OPTIONAL secondary source (e.g. an on-device astronomical
+ *   calculator) used ONLY when a primary fetch fails AND the cache is empty. Real cached data
+ *   is always preferred over this fallback, and a fallback result is never written to the
+ *   cache, so a later successful scrape always replaces it. Defaults to null (behaviour
+ *   unchanged: no calculated fallback).
  * @param onStateChange optional listener invoked with each new [state] as it is published.
  */
 class RefreshCoordinator(
@@ -45,6 +50,7 @@ class RefreshCoordinator(
     private val repository: ScheduleRepository,
     private val notificationScheduler: NotificationScheduler,
     private val clock: Clock,
+    private val fallbackProvider: TimesProvider? = null,
     private val onStateChange: ((RefreshState) -> Unit)? = null,
 ) {
 
@@ -108,18 +114,64 @@ class RefreshCoordinator(
             }
 
             is Result.Err -> {
-                // Failed fetch: keep the cached data exactly as-is (cache safety) and surface an
-                // error with a retry affordance. Notifications are left armed against the cache.
                 val cached = repository.getCachedSchedule()
-                publish(
-                    stateFor(
-                        schedule = cached.map { it.schedule },
-                        fetchedAt = cached.map { it.fetchedAt },
-                        now = now,
-                        cameFromCacheAfterFailure = cached.isSome,
-                        error = Option.Some(RefreshError.from(result.error)),
-                    ),
-                )
+                when {
+                    // Prefer real cached data over any calculated fallback: keep the cache
+                    // exactly as-is and surface an error + stale indicator (unchanged behaviour).
+                    cached.isSome -> publish(
+                        stateFor(
+                            schedule = cached.map { it.schedule },
+                            fetchedAt = cached.map { it.fetchedAt },
+                            now = now,
+                            cameFromCacheAfterFailure = true,
+                            error = Option.Some(RefreshError.from(result.error)),
+                        ),
+                    )
+
+                    // No cache: try the optional on-device calculated fallback.
+                    fallbackProvider != null ->
+                        when (val fallback = fallbackProvider.fetchTodaySchedule()) {
+                            is Result.Ok -> {
+                                val schedule = fallback.value
+                                // Arm notifications from the calculated schedule, but DO NOT
+                                // persist it — a later successful scrape must always replace it.
+                                notificationScheduler.reschedule(schedule, now)
+                                publish(
+                                    stateFor(
+                                        schedule = Option.Some(schedule),
+                                        fetchedAt = Option.None,
+                                        now = now,
+                                        cameFromCacheAfterFailure = false,
+                                        error = Option.Some(RefreshError.from(result.error)),
+                                        isCalculated = true,
+                                    ),
+                                )
+                            }
+
+                            // Fallback also failed: behave exactly as the no-cache/no-fallback
+                            // case — empty schedule with the original primary error.
+                            is Result.Err -> publish(
+                                stateFor(
+                                    schedule = Option.None,
+                                    fetchedAt = Option.None,
+                                    now = now,
+                                    cameFromCacheAfterFailure = false,
+                                    error = Option.Some(RefreshError.from(result.error)),
+                                ),
+                            )
+                        }
+
+                    // No cache and no fallback: unchanged behaviour (empty + error).
+                    else -> publish(
+                        stateFor(
+                            schedule = Option.None,
+                            fetchedAt = Option.None,
+                            now = now,
+                            cameFromCacheAfterFailure = false,
+                            error = Option.Some(RefreshError.from(result.error)),
+                        ),
+                    )
+                }
                 result
             }
         }
@@ -157,6 +209,7 @@ class RefreshCoordinator(
         now: DateTime,
         cameFromCacheAfterFailure: Boolean,
         error: Option<RefreshError>,
+        isCalculated: Boolean = false,
     ): RefreshState {
         val nextPrayer = schedule.flatMap { ScheduleService.getNextPrayer(it, now) }
         val timeUntilNext = schedule.flatMap { ScheduleService.timeUntilNext(it, now) }
@@ -167,10 +220,13 @@ class RefreshCoordinator(
         return RefreshState(
             schedule = schedule,
             fetchedAt = fetchedAt,
-            isStale = cameFromCacheAfterFailure || staleByAge,
+            // Calculated fallback data is always considered stale: it is an estimate shown only
+            // because the real source was unavailable.
+            isStale = cameFromCacheAfterFailure || staleByAge || isCalculated,
             nextPrayer = nextPrayer,
             timeUntilNext = timeUntilNext,
             error = error,
+            isCalculated = isCalculated,
         )
     }
 

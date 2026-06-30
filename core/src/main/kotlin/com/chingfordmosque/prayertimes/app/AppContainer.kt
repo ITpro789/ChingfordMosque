@@ -71,6 +71,9 @@ import com.chingfordmosque.prayertimes.ui.NextPrayerViewState
  * @param httpFetcher HTTP seam used by the default provider; defaults to the JVM fetcher.
  * @param url the page the default provider fetches; defaults to the mosque homepage.
  * @param timesProvider the source boundary; defaults to an [HttpTimesProvider] over [httpFetcher].
+ * @param fallbackProvider optional on-device fallback (e.g. a calculated provider) used only
+ *   when the primary fetch fails and the cache is empty; defaults to null. The Android build
+ *   passes a calculated provider here.
  * @param onStateChange optional listener invoked with each new [RefreshState] the coordinator
  *   publishes, so a host can observe updates without polling [state].
  */
@@ -84,6 +87,7 @@ class AppContainer(
     httpFetcher: HttpFetcher = JvmHttpFetcher(),
     url: String = JvmHttpFetcher.MOSQUE_URL,
     val timesProvider: TimesProvider = HttpTimesProvider(fetcher = httpFetcher, clock = clock, url = url),
+    fallbackProvider: TimesProvider? = null,
     onStateChange: ((RefreshState) -> Unit)? = null,
 ) {
 
@@ -112,6 +116,7 @@ class AppContainer(
             repository = repository,
             notificationScheduler = notificationScheduler,
             clock = clock,
+            fallbackProvider = fallbackProvider,
             onStateChange = onStateChange,
         )
 

@@ -20,6 +20,15 @@ Jetpack Compose (Material 3) UI with an emerald/teal + gold theme and full light
 - **Theme selection** — System / Light / Dark, persisted and applied app-wide.
 - **Offline cache** — the last-known-good schedule is cached locally and rendered immediately
   on launch, with graceful degradation and a stale indicator when refreshes fail.
+- **Background refresh** — a `WorkManager` unique periodic job (`RefreshWorker`, every 6 hours,
+  constrained to `NetworkType.CONNECTED`) drives `AppContainer.refreshNow()` so the cache stays
+  fresh and adhan alarms are re-armed even when the user never opens the app.
+- **Calculated fallback (estimated times)** — the container is wired with a
+  `CalculatedTimesProvider` fallback. If the mosque site is unreachable or its layout changes
+  AND there is no cache, the app still shows on-device astronomically calculated times. These
+  are clearly flagged with an amber "Estimated times — couldn't reach the mosque site" notice
+  near the freshness strip, and iqamah columns read "—" (calculation has no congregational
+  times).
 - **Bottom navigation** — Home, Qibla, Settings, and About destinations.
 
 ## Adhan sound

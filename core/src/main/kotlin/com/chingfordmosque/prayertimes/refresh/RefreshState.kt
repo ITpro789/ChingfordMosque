@@ -33,6 +33,10 @@ import com.chingfordmosque.prayertimes.domain.ProviderError
  * @property error the failure from the latest refresh attempt, or [Option.None] when the last
  *   refresh succeeded (or none has run). When present the UI surfaces an error banner with a
  *   retry affordance (Requirement 8.3) — retry being a call to [RefreshCoordinator.refreshNow].
+ * @property isCalculated true when the displayed schedule came from the on-device astronomical
+ *   fallback rather than the mosque website. It is only ever set when a website fetch failed
+ *   and there was no cached real schedule to prefer; real (scraped/cached) data always wins, so
+ *   this defaults to false.
  */
 data class RefreshState(
     val schedule: Option<DaySchedule>,
@@ -41,6 +45,7 @@ data class RefreshState(
     val nextPrayer: Option<PrayerTime>,
     val timeUntilNext: Option<Duration>,
     val error: Option<RefreshError>,
+    val isCalculated: Boolean = false,
 ) {
 
     /** True when there is a schedule to display (from cache or a fresh fetch). */
