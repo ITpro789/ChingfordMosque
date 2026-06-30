@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    A simple, asset-free mosque dome + crescent foreground for the adaptive launcher icon.
-    Drawn on a 108x108 viewport; the central ~72dp safe zone holds the artwork.
+    Adaptive launcher foreground: a modern mosque motif drawn on a 108x108
+    viewport. All artwork is kept inside the central ~66dp safe zone
+    (roughly x/y 21..87). Warm gold (#F4C95D) structures with white (#FFFFFF)
+    highlights read cleanly against the deep emerald background.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
@@ -9,32 +11,70 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Crescent moon (top), drawn as the difference of two circles via even-odd fill. -->
+    <!-- Crescent moon (top), difference of two circles via even-odd fill. -->
     <path
-        android:fillColor="#FFD27D"
+        android:fillColor="#F4C95D"
         android:fillType="evenOdd"
-        android:pathData="M62,24 m-9,0 a9,9 0 1,0 18,0 a9,9 0 1,0 -18,0 M66,20 m-7,0 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0" />
+        android:pathData="M54,26 m-6,0 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 M57,24.5 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0" />
 
-    <!-- Main dome. -->
+    <!-- Finial pole connecting crescent to the dome. -->
     <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M54,40 C44,40 38,48 38,58 L38,74 L70,74 L70,58 C70,48 64,40 54,40 Z" />
+        android:fillColor="#F4C95D"
+        android:pathData="M53,33 L55,33 L55,40 L53,40 Z" />
 
-    <!-- Dome finial. -->
+    <!-- Central onion dome. -->
     <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M53,34 L55,34 L55,40 L53,40 Z" />
+        android:fillColor="#F4C95D"
+        android:pathData="M54,37 C50,42 46,47 46,53 C46,59 50,63 54,63 C58,63 62,59 62,53 C62,47 58,42 54,37 Z" />
 
-    <!-- Base / plinth. -->
+    <!-- Soft white highlight on the dome. -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M34,74 L74,74 L74,80 L34,80 Z" />
+        android:pathData="M52,40 C50,44 49,48 49,52 C49,57 50,60 52,61 C50,57 50,52 51,48 C51.5,45 52,42 52,40 Z" />
 
-    <!-- Two minaret hints flanking the dome. -->
+    <!-- Dome base band. -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M32,52 L36,52 L36,80 L32,80 Z" />
+        android:pathData="M45,62 L63,62 L63,66 L45,66 Z" />
+
+    <!-- Main prayer hall body. -->
+    <path
+        android:fillColor="#F4C95D"
+        android:pathData="M44,66 L64,66 L64,85 L44,85 Z" />
+
+    <!-- Arched doorway highlight. -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M72,52 L76,52 L76,80 L72,80 Z" />
+        android:pathData="M50,85 L50,76 C50,72 58,72 58,76 L58,85 Z" />
+
+    <!-- Left minaret shaft. -->
+    <path
+        android:fillColor="#F4C95D"
+        android:pathData="M28,52 L34,52 L34,85 L28,85 Z" />
+    <!-- Left minaret cap. -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M28,52 C28,47 34,47 34,52 Z" />
+    <!-- Left minaret finial. -->
+    <path
+        android:fillColor="#F4C95D"
+        android:pathData="M30.5,43 L31.5,43 L31.5,48 L30.5,48 Z" />
+
+    <!-- Right minaret shaft. -->
+    <path
+        android:fillColor="#F4C95D"
+        android:pathData="M74,52 L80,52 L80,85 L74,85 Z" />
+    <!-- Right minaret cap. -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M74,52 C74,47 80,47 80,52 Z" />
+    <!-- Right minaret finial. -->
+    <path
+        android:fillColor="#F4C95D"
+        android:pathData="M76.5,43 L77.5,43 L77.5,48 L76.5,48 Z" />
+
+    <!-- Base platform. -->
+    <path
+        android:fillColor="#F4C95D"
+        android:pathData="M26,85 L82,85 L82,88 L26,88 Z" />
 </vector>
