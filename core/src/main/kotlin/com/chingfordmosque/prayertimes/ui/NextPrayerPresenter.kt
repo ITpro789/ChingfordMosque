@@ -4,6 +4,7 @@ import com.chingfordmosque.prayertimes.domain.DateTime
 import com.chingfordmosque.prayertimes.domain.Option
 import com.chingfordmosque.prayertimes.refresh.RefreshError
 import com.chingfordmosque.prayertimes.refresh.RefreshState
+import com.chingfordmosque.prayertimes.service.PrayerStatus
 import com.chingfordmosque.prayertimes.service.ScheduleService
 
 /**
@@ -49,10 +50,44 @@ object NextPrayerPresenter {
 
         val next = ScheduleService.getNextPrayer(schedule, now)
         val remaining = ScheduleService.timeUntilNext(schedule, now)
+
+        // Ring data: the current "prayer period" status (Active/Upcoming/None).
+        var ringPrayerName: String? = null
+        var ringIsActive = false
+        var ringCaption: String? = null
+        var ringCountdown: String? = null
+        var ringProgress = 0f
+        when (val status = ScheduleService.getPrayerStatus(schedule, now)) {
+            is PrayerStatus.Active -> {
+                ringPrayerName = status.prayer.name
+                ringIsActive = true
+                ringCaption = "${status.prayer.name} ends in"
+                ringCountdown = now.durationUntil(status.endsAt).toString()
+                val total = status.startsAt.durationUntil(status.endsAt).totalSeconds
+                val elapsed = status.startsAt.durationUntil(now).totalSeconds
+                ringProgress = if (total > 0) (elapsed.toFloat() / total).coerceIn(0f, 1f) else 0f
+            }
+            is PrayerStatus.Upcoming -> {
+                ringPrayerName = status.prayer.name
+                ringIsActive = false
+                ringCaption = "${status.prayer.name} begins in"
+                ringCountdown = now.durationUntil(status.beginsAt).toString()
+                val total = status.windowStartsAt.durationUntil(status.beginsAt).totalSeconds
+                val elapsed = status.windowStartsAt.durationUntil(now).totalSeconds
+                ringProgress = if (total > 0) (elapsed.toFloat() / total).coerceIn(0f, 1f) else 0f
+            }
+            is PrayerStatus.None -> { /* leave ring fields at defaults */ }
+        }
+
         return build(
             state = state,
             nextPrayerName = next.map { it.prayer.name }.getOrNull(),
             countdown = remaining.map { it.toString() }.getOrNull(),
+            ringPrayerName = ringPrayerName,
+            ringIsActive = ringIsActive,
+            ringCaption = ringCaption,
+            ringCountdown = ringCountdown,
+            ringProgress = ringProgress,
         )
     }
 
@@ -61,6 +96,11 @@ object NextPrayerPresenter {
         state: RefreshState,
         nextPrayerName: String?,
         countdown: String?,
+        ringPrayerName: String? = null,
+        ringIsActive: Boolean = false,
+        ringCaption: String? = null,
+        ringCountdown: String? = null,
+        ringProgress: Float = 0f,
     ): NextPrayerViewState =
         NextPrayerViewState(
             nextPrayerName = nextPrayerName,
@@ -70,6 +110,11 @@ object NextPrayerPresenter {
             errorBanner = state.error.map { toBanner(it) }.getOrNull(),
             // The manual refresh control is always available (Requirement 7.3).
             showManualRefresh = true,
+            ringPrayerName = ringPrayerName,
+            ringIsActive = ringIsActive,
+            ringCaption = ringCaption,
+            ringCountdown = ringCountdown,
+            ringProgress = ringProgress,
         )
 
     /**

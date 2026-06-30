@@ -1,23 +1,29 @@
 package com.chingfordmosque.prayertimes.android.ui
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
@@ -37,11 +43,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.Canvas
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.collectAsState
 import com.chingfordmosque.prayertimes.android.ui.theme.ChingfordMosqueTheme
@@ -65,8 +77,9 @@ fun PrayerTimesRoute(
 }
 
 /**
- * The single, sleek prayer-times screen: a gradient hero with a live countdown, a freshness /
- * error strip, the day's prayer cards (highlighting the next prayer), and the Jummah card.
+ * The single, sleek prayer-times screen: a hero built around a circular countdown timer, a
+ * freshness / error strip, the day's prayer cards (highlighting the active prayer), and the
+ * Jummah card — over a subtle vertical gradient background.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,7 +87,14 @@ fun PrayerTimesScreen(
     state: PrayerUiState,
     onRefresh: () -> Unit,
 ) {
+    val appBackground = Brush.verticalGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.background,
+            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+        ),
+    )
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { Text("Chingford Mosque", fontWeight = FontWeight.SemiBold) },
@@ -93,8 +113,9 @@ fun PrayerTimesScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                    actionIconContentColor = MaterialTheme.colorScheme.primary,
                 ),
             )
         },
@@ -103,11 +124,12 @@ fun PrayerTimesScreen(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
+                .background(appBackground)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            HeroHeader(today = state.today, next = state.next)
+            CountdownHero(today = state.today, next = state.next)
 
             FreshnessStrip(next = state.next)
 
@@ -124,10 +146,11 @@ fun PrayerTimesScreen(
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                 )
+                val activeName = if (state.next.ringIsActive) state.next.ringPrayerName else null
                 today.rows.forEach { row ->
                     PrayerCard(
                         row = row,
-                        isNext = row.prayerName == state.next.nextPrayerName,
+                        isActive = row.prayerName == activeName,
                     )
                 }
             }
@@ -139,8 +162,12 @@ fun PrayerTimesScreen(
     }
 }
 
+/**
+ * The hero card: a large circular countdown ring with the current/upcoming prayer at its
+ * centre, over a soft brand gradient.
+ */
 @Composable
-private fun HeroHeader(
+private fun CountdownHero(
     today: DayScheduleViewState?,
     next: NextPrayerViewState,
 ) {
@@ -151,54 +178,171 @@ private fun HeroHeader(
         ),
     )
     Surface(
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(28.dp),
         modifier = Modifier.fillMaxWidth(),
+        shadowElevation = 6.dp,
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(gradient)
-                .padding(24.dp),
+                .padding(horizontal = 24.dp, vertical = 28.dp),
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
                 Text(
-                    text = "Chingford Mosque",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontWeight = FontWeight.Bold,
+                    text = today?.date ?: "Chingford Mosque",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
+                    fontWeight = FontWeight.Medium,
                 )
-                today?.date?.let {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f),
-                    )
-                }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                val name = next.nextPrayerName
-                val countdown = next.countdown
-                if (name != null && countdown != null) {
-                    Text(
-                        text = "$name in",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
-                    )
-                    Text(
-                        text = countdown,
-                        style = CountdownTextStyle,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                    )
-                } else {
-                    Text(
-                        text = "No upcoming prayer",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                    )
-                }
+                CircularCountdownRing(next = next)
             }
         }
+    }
+}
+
+/**
+ * The circular progress ring (Canvas drawArc) with the prayer name, big countdown and caption
+ * at its centre. Falls back to a graceful placeholder when there is no ring data.
+ */
+@Composable
+private fun CircularCountdownRing(next: NextPrayerViewState) {
+    val onPrimary = MaterialTheme.colorScheme.onPrimary
+    val accent = MaterialTheme.colorScheme.tertiary
+    val trackColor = onPrimary.copy(alpha = 0.18f)
+    val sweepBrush = Brush.sweepGradient(
+        colors = listOf(accent, onPrimary, accent),
+    )
+
+    val targetProgress = next.ringProgress.coerceIn(0f, 1f)
+    val animatedProgress by animateFloatAsState(
+        targetValue = targetProgress,
+        animationSpec = tween(durationMillis = 600),
+        label = "ringProgress",
+    )
+
+    Box(
+        modifier = Modifier
+            .widthIn(max = 280.dp)
+            .fillMaxWidth()
+            .aspectRatio(1f),
+        contentAlignment = Alignment.Center,
+    ) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val strokeWidth = 16.dp.toPx()
+            val inset = strokeWidth / 2f
+            val arcSize = Size(size.width - strokeWidth, size.height - strokeWidth)
+            val topLeft = Offset(inset, inset)
+
+            // Soft track behind the sweep.
+            drawArc(
+                color = trackColor,
+                startAngle = 0f,
+                sweepAngle = 360f,
+                useCenter = false,
+                topLeft = topLeft,
+                size = arcSize,
+                style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+            )
+            // Gradient progress sweep, starting from the top (12 o'clock).
+            if (next.ringPrayerName != null) {
+                drawArc(
+                    brush = sweepBrush,
+                    startAngle = -90f,
+                    sweepAngle = 360f * animatedProgress,
+                    useCenter = false,
+                    topLeft = topLeft,
+                    size = arcSize,
+                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+                )
+            }
+        }
+
+        RingCenter(next = next)
+    }
+}
+
+@Composable
+private fun RingCenter(next: NextPrayerViewState) {
+    val onPrimary = MaterialTheme.colorScheme.onPrimary
+    val name = next.ringPrayerName
+    val countdown = next.ringCountdown
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        if (name != null && countdown != null) {
+            if (next.ringIsActive) {
+                NowBadge()
+                Spacer(modifier = Modifier.height(6.dp))
+            }
+            Text(
+                text = name,
+                style = MaterialTheme.typography.headlineSmall,
+                color = onPrimary,
+                fontWeight = FontWeight.Bold,
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = countdown,
+                style = CountdownTextStyle,
+                color = onPrimary,
+            )
+            next.ringCaption?.let { caption ->
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = caption,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = onPrimary.copy(alpha = 0.85f),
+                )
+            }
+        } else {
+            Icon(
+                imageVector = Icons.Outlined.Schedule,
+                contentDescription = null,
+                tint = onPrimary.copy(alpha = 0.85f),
+                modifier = Modifier.size(40.dp),
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "No prayer times yet",
+                style = MaterialTheme.typography.titleMedium,
+                color = onPrimary,
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
+}
+
+@Composable
+private fun NowBadge() {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.tertiary)
+            .padding(horizontal = 10.dp, vertical = 4.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(7.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.onTertiary),
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(
+            text = "Now",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onTertiary,
+            fontWeight = FontWeight.Bold,
+        )
     }
 }
 
@@ -239,7 +383,7 @@ private fun ErrorBanner(
             containerColor = MaterialTheme.colorScheme.errorContainer,
             contentColor = MaterialTheme.colorScheme.onErrorContainer,
         ),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(text = banner.message, style = MaterialTheme.typography.bodyMedium)
@@ -257,28 +401,28 @@ private fun ErrorBanner(
 @Composable
 private fun PrayerCard(
     row: PrayerRowViewState,
-    isNext: Boolean,
+    isActive: Boolean,
 ) {
     val containerColor = when {
-        isNext -> MaterialTheme.colorScheme.primaryContainer
+        isActive -> MaterialTheme.colorScheme.primaryContainer
         row.isInformational -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         else -> MaterialTheme.colorScheme.surface
     }
     val contentColor = when {
-        isNext -> MaterialTheme.colorScheme.onPrimaryContainer
+        isActive -> MaterialTheme.colorScheme.onPrimaryContainer
         row.isInformational -> MaterialTheme.colorScheme.onSurfaceVariant
         else -> MaterialTheme.colorScheme.onSurface
     }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = containerColor,
             contentColor = contentColor,
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = if (isNext) 4.dp else 1.dp,
+            defaultElevation = if (isActive) 4.dp else 1.dp,
         ),
     ) {
         Row(
@@ -289,10 +433,19 @@ private fun PrayerCard(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (row.isInformational) {
+                if (isActive) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary),
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                } else if (row.isInformational) {
                     Icon(
                         imageVector = Icons.Filled.WbSunny,
                         contentDescription = null,
+                        tint = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.size(18.dp),
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -301,11 +454,11 @@ private fun PrayerCard(
                     Text(
                         text = row.prayerName,
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = if (isNext) FontWeight.Bold else FontWeight.Medium,
+                        fontWeight = if (isActive) FontWeight.Bold else FontWeight.Medium,
                     )
-                    if (isNext) {
+                    if (isActive) {
                         Text(
-                            text = "Next prayer",
+                            text = "In progress",
                             style = MaterialTheme.typography.labelSmall,
                         )
                     } else if (row.isInformational) {
@@ -344,7 +497,7 @@ private fun JummahCard(jummah: JummahSectionViewState) {
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
             contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -377,7 +530,7 @@ private fun JummahCard(jummah: JummahSectionViewState) {
 private fun EmptyState(isRefreshing: Boolean) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
     ) {
         Column(
             modifier = Modifier
@@ -391,7 +544,7 @@ private fun EmptyState(isRefreshing: Boolean) {
                 Text("Loading prayer times\u2026", textAlign = TextAlign.Center)
             } else {
                 Text(
-                    text = "No prayer times yet. Pull refresh to load the latest schedule.",
+                    text = "No prayer times yet. Tap refresh to load the latest schedule.",
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                 )
@@ -400,33 +553,67 @@ private fun EmptyState(isRefreshing: Boolean) {
     }
 }
 
-// --- Preview -------------------------------------------------------------------------------
+// --- Previews ------------------------------------------------------------------------------
 
-@Preview(showBackground = true)
-@Composable
-private fun PrayerTimesScreenPreview() {
-    val sample = PrayerUiState(
-        today = DayScheduleViewState(
-            date = "2026-06-30",
-            rows = listOf(
-                PrayerRowViewState("Fajr", "03:03", "03:30", isInformational = false),
-                PrayerRowViewState("Sunrise", "04:42", null, isInformational = true),
-                PrayerRowViewState("Zuhr", "13:05", "13:30", isInformational = false),
-                PrayerRowViewState("Asr", "18:30", "19:00", isInformational = false),
-                PrayerRowViewState("Maghrib", "21:21", "21:26", isInformational = false),
-                PrayerRowViewState("Isha", "22:45", "23:00", isInformational = false),
-            ),
+private fun sampleState(
+    next: NextPrayerViewState,
+): PrayerUiState = PrayerUiState(
+    today = DayScheduleViewState(
+        date = "2026-06-30",
+        rows = listOf(
+            PrayerRowViewState("Fajr", "03:03", "03:30", isInformational = false),
+            PrayerRowViewState("Sunrise", "04:42", null, isInformational = true),
+            PrayerRowViewState("Zuhr", "13:05", "13:30", isInformational = false),
+            PrayerRowViewState("Asr", "18:30", "19:00", isInformational = false),
+            PrayerRowViewState("Maghrib", "21:21", "21:26", isInformational = false),
+            PrayerRowViewState("Isha", "22:45", "23:00", isInformational = false),
         ),
-        jummah = JummahSectionViewState.Visible(listOf("13:00", "13:30")),
+    ),
+    jummah = JummahSectionViewState.Visible(listOf("13:00", "13:30")),
+    next = next,
+    isRefreshing = false,
+)
+
+@Preview(showBackground = true, name = "Active prayer")
+@Composable
+private fun PrayerTimesScreenActivePreview() {
+    val sample = sampleState(
         next = NextPrayerViewState(
-            nextPrayerName = "Maghrib",
+            nextPrayerName = "Isha",
             countdown = "01:23:45",
             lastUpdatedText = "Last updated 2026-06-30 07:12",
             isStale = false,
             errorBanner = null,
             showManualRefresh = true,
+            ringPrayerName = "Maghrib",
+            ringIsActive = true,
+            ringCaption = "Maghrib ends in",
+            ringCountdown = "01:23:45",
+            ringProgress = 0.42f,
         ),
-        isRefreshing = false,
+    )
+    ChingfordMosqueTheme {
+        PrayerTimesScreen(state = sample, onRefresh = {})
+    }
+}
+
+@Preview(showBackground = true, name = "Upcoming prayer")
+@Composable
+private fun PrayerTimesScreenUpcomingPreview() {
+    val sample = sampleState(
+        next = NextPrayerViewState(
+            nextPrayerName = "Zuhr",
+            countdown = "04:00:00",
+            lastUpdatedText = "Last updated 2026-06-30 07:12",
+            isStale = true,
+            errorBanner = null,
+            showManualRefresh = true,
+            ringPrayerName = "Zuhr",
+            ringIsActive = false,
+            ringCaption = "Zuhr begins in",
+            ringCountdown = "04:00:00",
+            ringProgress = 0.6f,
+        ),
     )
     ChingfordMosqueTheme {
         PrayerTimesScreen(state = sample, onRefresh = {})

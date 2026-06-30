@@ -32,6 +32,16 @@ data class NextPrayerViewState(
     val isStale: Boolean,
     val errorBanner: ErrorBannerViewState?,
     val showManualRefresh: Boolean,
+    /** The current (Active) or upcoming prayer name driving the countdown ring, or `null`. */
+    val ringPrayerName: String? = null,
+    /** `true` when a prayer is currently active (its window is in progress). */
+    val ringIsActive: Boolean = false,
+    /** Caption for the ring, e.g. "Maghrib ends in" or "Zuhr begins in". */
+    val ringCaption: String? = null,
+    /** "HH:mm:ss" until the window ends (active) or begins (upcoming). */
+    val ringCountdown: String? = null,
+    /** Fraction (0f..1f) of the current/upcoming window that has elapsed. */
+    val ringProgress: Float = 0f,
 )
 
 /**

@@ -4,6 +4,7 @@ import com.chingfordmosque.prayertimes.domain.DaySchedule
 import com.chingfordmosque.prayertimes.domain.DateTime
 import com.chingfordmosque.prayertimes.domain.Duration
 import com.chingfordmosque.prayertimes.domain.Option
+import com.chingfordmosque.prayertimes.domain.Prayer
 import com.chingfordmosque.prayertimes.domain.PrayerTime
 
 /**
@@ -107,5 +108,72 @@ object ScheduleService {
             .filter { (_, instant) -> instant > now }
             .minByOrNull { (_, instant) -> instant }
         return Option.ofNullable(candidate)
+    }
+
+    /**
+     * The "current prayer period" status relative to [now] — the data driving the circular
+     * countdown timer (see [PrayerStatus]).
+     *
+     * Windows are computed on the schedule's own [DaySchedule.scheduleDate] using prayer begin
+     * instants, encoding these period rules exactly:
+     *  1. Carryover Isha:  [scheduleDate 00:00:00, Fajr.begin)
+     *  2. Fajr:            [Fajr.begin, Sunrise.begin)
+     *  3. Zuhr:            [Zuhr.begin, Asr.begin)
+     *  4. Asr:             [Asr.begin, Maghrib.begin)
+     *  5. Maghrib:         [Maghrib.begin, Isha.begin)
+     *  6. Isha:            [Isha.begin, next-day Fajr.begin)
+     *
+     * A window is skipped if any begin it requires is absent from the schedule. If [now] falls
+     * inside a window → [PrayerStatus.Active]. Otherwise the earliest window starting after
+     * [now] → [PrayerStatus.Upcoming] (with [PrayerStatus.Upcoming.windowStartsAt] = the latest
+     * preceding window-end at/ before [now], or midnight). Otherwise → [PrayerStatus.None].
+     */
+    fun getPrayerStatus(schedule: DaySchedule, now: DateTime): PrayerStatus {
+        val date = schedule.scheduleDate
+        val midnight = DateTime.of(date, 0, 0, 0).getOrThrow()
+
+        fun begin(p: Prayer): DateTime? =
+            schedule.prayer(p).getOrNull()?.let { DateTime.of(date, it.beginsAt) }
+
+        val fajr = begin(Prayer.Fajr)
+        val sunrise = begin(Prayer.Sunrise)
+        val zuhr = begin(Prayer.Zuhr)
+        val asr = begin(Prayer.Asr)
+        val maghrib = begin(Prayer.Maghrib)
+        val isha = begin(Prayer.Isha)
+        val nextDayFajr = schedule.prayer(Prayer.Fajr).getOrNull()
+            ?.let { DateTime.of(date.nextDay(), it.beginsAt) }
+
+        // (prayer, start, end) windows, in chronological order; only those fully defined.
+        val windows = buildList {
+            if (fajr != null) add(Triple(Prayer.Isha, midnight, fajr))            // carryover
+            if (fajr != null && sunrise != null) add(Triple(Prayer.Fajr, fajr, sunrise))
+            if (zuhr != null && asr != null) add(Triple(Prayer.Zuhr, zuhr, asr))
+            if (asr != null && maghrib != null) add(Triple(Prayer.Asr, asr, maghrib))
+            if (maghrib != null && isha != null) add(Triple(Prayer.Maghrib, maghrib, isha))
+            if (isha != null && nextDayFajr != null) add(Triple(Prayer.Isha, isha, nextDayFajr))
+        }
+
+        // Inside a window [start, end) -> Active.
+        windows.firstOrNull { (_, start, end) -> now >= start && now < end }
+            ?.let { (prayer, start, end) -> return PrayerStatus.Active(prayer, start, end) }
+
+        // Earliest window starting strictly after now -> Upcoming.
+        val upcoming = windows.filter { (_, start, _) -> start > now }
+            .minByOrNull { (_, start, _) -> start }
+            ?: return PrayerStatus.None
+
+        // windowStartsAt = latest preceding window-end that is <= now, else midnight.
+        val windowStart = windows
+            .map { (_, _, end) -> end }
+            .filter { it <= now }
+            .maxOrNull()
+            ?: midnight
+
+        return PrayerStatus.Upcoming(
+            prayer = upcoming.first,
+            windowStartsAt = windowStart,
+            beginsAt = upcoming.second,
+        )
     }
 }
