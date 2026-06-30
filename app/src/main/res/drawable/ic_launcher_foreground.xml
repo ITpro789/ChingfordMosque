@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    A simple, asset-free mosque dome + crescent foreground for the adaptive launcher icon.
+    Drawn on a 108x108 viewport; the central ~72dp safe zone holds the artwork.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Crescent moon (top), drawn as the difference of two circles via even-odd fill. -->
+    <path
+        android:fillColor="#FFD27D"
+        android:fillType="evenOdd"
+        android:pathData="M62,24 m-9,0 a9,9 0 1,0 18,0 a9,9 0 1,0 -18,0 M66,20 m-7,0 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0" />
+
+    <!-- Main dome. -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,40 C44,40 38,48 38,58 L38,74 L70,74 L70,58 C70,48 64,40 54,40 Z" />
+
+    <!-- Dome finial. -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M53,34 L55,34 L55,40 L53,40 Z" />
+
+    <!-- Base / plinth. -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M34,74 L74,74 L74,80 L34,80 Z" />
+
+    <!-- Two minaret hints flanking the dome. -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M32,52 L36,52 L36,80 L32,80 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M72,52 L76,52 L76,80 L72,80 Z" />
+</vector>

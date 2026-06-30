@@ -1,0 +1,576 @@
+{
+  "pbtResults": {
+    "1.3 Write property test for schedule validation invariants": {
+      "status": "passed",
+      "lastRunTimestamp": 1782851992359
+    },
+    "2.3 Write property test for Sunrise exclusion": {
+      "status": "passed",
+      "lastRunTimestamp": 1782852222418
+    },
+    "4.2 Write property test for cache safety": {
+      "status": "passed",
+      "lastRunTimestamp": 1782852265071
+    },
+    "2.2 Write property test for next-prayer correctness": {
+      "status": "passed",
+      "lastRunTimestamp": 1782852367449
+    },
+    "7.4 Write property test for Sunrise non-notification": {
+      "status": "passed",
+      "lastRunTimestamp": 1782852791146
+    },
+    "7.3 Write property test for no-duplicate-alerts": {
+      "status": "passed",
+      "lastRunTimestamp": 1782852816829
+    },
+    "9.5 Write property test for freshness visibility": {
+      "status": "passed",
+      "lastRunTimestamp": 1782853981516
+    }
+  },
+  "executionHistory": {
+    "1.1 Create module/package structure and core domain types": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782850813930
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782850820071
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782851232434
+      }
+    ],
+    "1.2 Implement PrayerTime, JummahTimes, DaySchedule, CachedSchedule and validation": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782850813936
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782851238737
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782851415873
+      }
+    ],
+    "2.1 Implement getNextPrayer, timeUntilNext, and orderedPrayers": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782850813941
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782851423106
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782851829526
+      }
+    ],
+    "3. Checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782850813946
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782854325924
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782854403572
+      }
+    ],
+    "4.1 Implement persistence of CachedSchedule with cache-safety": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782850813949
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782851423560
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782851829619
+      }
+    ],
+    "5.1 Implement HTTP fetch over HTTPS": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782850813953
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782852088599
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782852391829
+      }
+    ],
+    "5.2 Implement widget parsing and time normalization": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782850813956
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782852647296
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853015787
+      }
+    ],
+    "5.3 Validate parsed schedule and assemble fetchTodaySchedule": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782850813960
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853045631
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853395335
+      }
+    ],
+    "6. Checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782850813964
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782854406573
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782854411619
+      }
+    ],
+    "7.1 Implement reschedule, cancelAll, and setPreferences": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782850813968
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782852434789
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782852629120
+      }
+    ],
+    "7.2 Handle notification permission state": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782850813972
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782852648295
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853016222
+      }
+    ],
+    "8.1 Implement onAppOpened, refreshNow, and graceful degradation": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782850813975
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853046703
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853397317
+      }
+    ],
+    "8.2 Implement daily rollover refresh": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782850813981
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853406033
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853715389
+      }
+    ],
+    "9.1 Implement today's salah times view": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782850813985
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853047745
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853398838
+      }
+    ],
+    "9.2 Implement Jummah times section": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782850813989
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853048223
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853399324
+      }
+    ],
+    "9.3 Implement next-prayer countdown and freshness/error indicators": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782850813993
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853407026
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853717337
+      }
+    ],
+    "10.1 Wire all components together": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782850813997
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853734195
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782854070704
+      }
+    ],
+    "11. Final checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782850814001
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782854415691
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782854418834
+      }
+    ],
+    "1. Set up project structure and core domain model": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782851415877
+      }
+    ],
+    "2. Implement Schedule Service (next-prayer + countdown)": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782851829535
+      }
+    ],
+    "4. Implement Schedule Repository (local cache)": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782851829623
+      }
+    ],
+    "1.3 Write property test for schedule validation invariants": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782851865927
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782852067575
+      }
+    ],
+    "1.4 Write unit tests for domain validation edge cases": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782851866504
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782852067670
+      }
+    ],
+    "2.2 Write property test for next-prayer correctness": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782852089551
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782852392795
+      }
+    ],
+    "2.3 Write property test for Sunrise exclusion": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782852090615
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782852393800
+      }
+    ],
+    "2.4 Write unit tests for boundary cases": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782852091639
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782852396460
+      }
+    ],
+    "4.2 Write property test for cache safety": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782852092195
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782852397041
+      }
+    ],
+    "4.3 Write unit tests for repository round-trip": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782852434852
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782852629833
+      }
+    ],
+    "7.3 Write property test for no-duplicate-alerts": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782852649298
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853017153
+      }
+    ],
+    "7.4 Write property test for Sunrise non-notification": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782852650323
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853018085
+      }
+    ],
+    "7.5 Write unit tests for preferences and re-arming": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782852650649
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853018475
+      }
+    ],
+    "7. Implement Notification Scheduler (adhan alerts)": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853016226
+      }
+    ],
+    "5. Implement Times Provider (fetch + parse + normalize)": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853395341
+      }
+    ],
+    "5.4 Write unit tests against recorded HTML fixtures": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853407865
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853717391
+      }
+    ],
+    "8. Implement Refresh Coordinator (scheduled + on-demand)": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853715394
+      }
+    ],
+    "9. Implement UI layer": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853717344
+      }
+    ],
+    "8.3 Write unit tests for refresh orchestration": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853736575
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782854071037
+      }
+    ],
+    "9.4 Write unit tests for view-state formatting": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853736778
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782854071816
+      }
+    ],
+    "9.5 Write property test for freshness visibility": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782853736981
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782854072657
+      }
+    ],
+    "10. Integration and wiring": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782854070708
+      }
+    ],
+    "10.2 Write integration tests for end-to-end refresh": [
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782854091088
+      },
+      {
+        "executionId": "94cdeeb4-9b1c-46bc-8398-c490c5975239",
+        "chatSessionId": "3de804f0-ea77-4796-a2b6-e6143b21b4b2",
+        "timestamp": 1782854318780
+      }
+    ]
+  }
+}

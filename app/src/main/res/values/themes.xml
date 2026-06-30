@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        The real Material 3 colours are supplied by Compose (see ui/theme/Theme.kt). This XML
+        base theme only needs to be a Material3 DayNight theme with no action bar so the Compose
+        content can draw edge-to-edge. The parent comes from com.google.android.material.
+    -->
+    <style name="Theme.ChingfordMosque" parent="Theme.Material3.DayNight.NoActionBar" />
+</resources>
