@@ -13,23 +13,23 @@ import androidx.compose.ui.platform.LocalContext
 /**
  * The Material 3 theme for the Chingford Mosque app.
  *
- * Uses a hand-tuned emerald/teal + gold palette for both light and dark, and optionally adopts
- * Android 12+ dynamic colour (falling back to the brand scheme when unavailable or disabled).
+ * Uses a hand-tuned indigo/slate + amber palette for both light and dark, and optionally adopts
+ * Android 12+ dynamic colour (disabled by default so the brand scheme is always shown).
  */
 
 private val LightColors = lightColorScheme(
-    primary = EmeraldPrimaryLight,
-    onPrimary = EmeraldOnPrimaryLight,
-    primaryContainer = EmeraldPrimaryContainerLight,
-    onPrimaryContainer = EmeraldOnPrimaryContainerLight,
-    secondary = TealSecondaryLight,
-    onSecondary = TealOnSecondaryLight,
-    secondaryContainer = TealSecondaryContainerLight,
-    onSecondaryContainer = TealOnSecondaryContainerLight,
-    tertiary = GoldTertiaryLight,
-    onTertiary = GoldOnTertiaryLight,
-    tertiaryContainer = GoldTertiaryContainerLight,
-    onTertiaryContainer = GoldOnTertiaryContainerLight,
+    primary = IndigoPrimaryLight,
+    onPrimary = IndigoOnPrimaryLight,
+    primaryContainer = IndigoPrimaryContainerLight,
+    onPrimaryContainer = IndigoOnPrimaryContainerLight,
+    secondary = SlateSecondaryLight,
+    onSecondary = SlateOnSecondaryLight,
+    secondaryContainer = SlateSecondaryContainerLight,
+    onSecondaryContainer = SlateOnSecondaryContainerLight,
+    tertiary = AmberTertiaryLight,
+    onTertiary = AmberOnTertiaryLight,
+    tertiaryContainer = AmberTertiaryContainerLight,
+    onTertiaryContainer = AmberOnTertiaryContainerLight,
     background = BackgroundLight,
     onBackground = OnBackgroundLight,
     surface = SurfaceLight,
@@ -44,18 +44,18 @@ private val LightColors = lightColorScheme(
 )
 
 private val DarkColors = darkColorScheme(
-    primary = EmeraldPrimaryDark,
-    onPrimary = EmeraldOnPrimaryDark,
-    primaryContainer = EmeraldPrimaryContainerDark,
-    onPrimaryContainer = EmeraldOnPrimaryContainerDark,
-    secondary = TealSecondaryDark,
-    onSecondary = TealOnSecondaryDark,
-    secondaryContainer = TealSecondaryContainerDark,
-    onSecondaryContainer = TealOnSecondaryContainerDark,
-    tertiary = GoldTertiaryDark,
-    onTertiary = GoldOnTertiaryDark,
-    tertiaryContainer = GoldTertiaryContainerDark,
-    onTertiaryContainer = GoldOnTertiaryContainerDark,
+    primary = IndigoPrimaryDark,
+    onPrimary = IndigoOnPrimaryDark,
+    primaryContainer = IndigoPrimaryContainerDark,
+    onPrimaryContainer = IndigoOnPrimaryContainerDark,
+    secondary = SlateSecondaryDark,
+    onSecondary = SlateOnSecondaryDark,
+    secondaryContainer = SlateSecondaryContainerDark,
+    onSecondaryContainer = SlateOnSecondaryContainerDark,
+    tertiary = AmberTertiaryDark,
+    onTertiary = AmberOnTertiaryDark,
+    tertiaryContainer = AmberTertiaryContainerDark,
+    onTertiaryContainer = AmberOnTertiaryContainerDark,
     background = BackgroundDark,
     onBackground = OnBackgroundDark,
     surface = SurfaceDark,
@@ -72,7 +72,7 @@ private val DarkColors = darkColorScheme(
 @Composable
 fun ChingfordMosqueTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val colorScheme = when {

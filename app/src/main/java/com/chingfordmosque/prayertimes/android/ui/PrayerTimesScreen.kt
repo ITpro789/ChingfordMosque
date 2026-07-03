@@ -160,20 +160,14 @@ fun PrayerTimesScreen(
             } else {
                 JummahCard(jummah = state.jummah)
 
-                Text(
-                    text = "Today's prayers",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                )
+                // Timetable — single container with flat rows, matching mockup
                 val activeName = if (state.next.ringIsActive) state.next.ringPrayerName else null
                 val isFriday = state.jummah is JummahSectionViewState.Visible
-                today.rows.forEach { row ->
-                    PrayerCard(
-                        row = row,
-                        isActive = row.prayerName == activeName,
-                        isFriday = isFriday,
-                    )
-                }
+                PrayerTimetable(
+                    rows = today.rows,
+                    activeName = activeName,
+                    isFriday = isFriday,
+                )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -192,20 +186,20 @@ private fun CountdownHero(
 ) {
     val gradient = Brush.verticalGradient(
         colors = listOf(
-            MaterialTheme.colorScheme.primary,
-            MaterialTheme.colorScheme.primaryContainer,
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+            Color.Transparent,
         ),
     )
     Surface(
-        shape = RoundedCornerShape(28.dp),
+        shape = RoundedCornerShape(24.dp),
         modifier = Modifier.fillMaxWidth(),
-        shadowElevation = 6.dp,
+        color = Color.Transparent,
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(gradient)
-                .padding(horizontal = 24.dp, vertical = 28.dp),
+                .padding(horizontal = 20.dp, vertical = 20.dp),
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -214,7 +208,7 @@ private fun CountdownHero(
                 Text(
                     text = today?.date ?: "Chingford Mosque",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.Medium,
                 )
 
@@ -224,7 +218,7 @@ private fun CountdownHero(
                     Text(
                         text = hijri,
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                         fontWeight = FontWeight.Medium,
                     )
                 }
@@ -243,11 +237,12 @@ private fun CountdownHero(
  */
 @Composable
 private fun CircularCountdownRing(next: NextPrayerViewState) {
-    val onPrimary = MaterialTheme.colorScheme.onPrimary
+    val ringTextColor = MaterialTheme.colorScheme.onBackground
     val accent = MaterialTheme.colorScheme.tertiary
-    val trackColor = onPrimary.copy(alpha = 0.18f)
+    val primary = MaterialTheme.colorScheme.primary
+    val trackColor = primary.copy(alpha = 0.15f)
     val sweepBrush = Brush.sweepGradient(
-        colors = listOf(accent, onPrimary, accent),
+        colors = listOf(primary, accent, primary),
     )
 
     val targetProgress = next.ringProgress.coerceIn(0f, 1f)
@@ -300,7 +295,8 @@ private fun CircularCountdownRing(next: NextPrayerViewState) {
 
 @Composable
 private fun RingCenter(next: NextPrayerViewState) {
-    val onPrimary = MaterialTheme.colorScheme.onPrimary
+    val ringTextColor = MaterialTheme.colorScheme.onBackground
+    val countdownColor = MaterialTheme.colorScheme.tertiary
     val name = next.ringPrayerName
     val countdown = next.ringCountdown
 
@@ -316,35 +312,35 @@ private fun RingCenter(next: NextPrayerViewState) {
             Text(
                 text = name,
                 style = MaterialTheme.typography.headlineSmall,
-                color = onPrimary,
+                color = ringTextColor,
                 fontWeight = FontWeight.Bold,
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = countdown,
                 style = CountdownTextStyle,
-                color = onPrimary,
+                color = countdownColor,
             )
             next.ringCaption?.let { caption ->
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = caption,
                     style = MaterialTheme.typography.labelLarge,
-                    color = onPrimary.copy(alpha = 0.85f),
+                    color = ringTextColor.copy(alpha = 0.7f),
                 )
             }
         } else {
             Icon(
                 imageVector = Icons.Outlined.Schedule,
                 contentDescription = null,
-                tint = onPrimary.copy(alpha = 0.85f),
+                tint = ringTextColor.copy(alpha = 0.5f),
                 modifier = Modifier.size(40.dp),
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "No prayer times yet",
                 style = MaterialTheme.typography.titleMedium,
-                color = onPrimary,
+                color = ringTextColor,
                 textAlign = TextAlign.Center,
             )
         }
@@ -465,88 +461,102 @@ private fun ErrorBanner(
     }
 }
 
+/**
+ * A single timetable container with flat rows — matching the mockup's design.
+ * Active prayer gets a left border and tinted background instead of a separate card.
+ */
 @Composable
-private fun PrayerCard(
-    row: PrayerRowViewState,
-    isActive: Boolean,
-    isFriday: Boolean = false,
+private fun PrayerTimetable(
+    rows: List<PrayerRowViewState>,
+    activeName: String?,
+    isFriday: Boolean,
 ) {
-    val isZuhrOnFriday = isFriday && row.prayerName.equals("Zuhr", ignoreCase = true)
-    val displayName = if (isZuhrOnFriday) "Zuhr (Jummah)" else row.prayerName
-    val displayIqamah = if (isZuhrOnFriday) "See Above" else (row.iqamah ?: "\u2014")
-
-    val containerColor = when {
-        isActive -> MaterialTheme.colorScheme.primaryContainer
-        row.isInformational -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        else -> MaterialTheme.colorScheme.surface
-    }
-    val contentColor = when {
-        isActive -> MaterialTheme.colorScheme.onPrimaryContainer
-        row.isInformational -> MaterialTheme.colorScheme.onSurfaceVariant
-        else -> MaterialTheme.colorScheme.onSurface
-    }
-
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = containerColor,
-            contentColor = contentColor,
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.2f),
         ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = if (isActive) 4.dp else 1.dp,
-        ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 18.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (isActive) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary),
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                } else if (row.isInformational) {
-                    Icon(
-                        imageVector = Icons.Filled.WbSunny,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier.size(18.dp),
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                }
-                Column {
-                    Text(
-                        text = displayName,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = if (isActive) FontWeight.Bold else FontWeight.Medium,
-                    )
-                    if (isActive) {
-                        Text(
-                            text = "In progress",
-                            style = MaterialTheme.typography.labelSmall,
-                        )
-                    } else if (row.isInformational) {
-                        Text(
-                            text = "Informational",
-                            style = MaterialTheme.typography.labelSmall,
-                        )
-                    }
-                }
-            }
+        Column(modifier = Modifier.padding(10.dp)) {
+            rows.forEachIndexed { index, row ->
+                val isActive = row.prayerName == activeName
+                val isZuhrOnFriday = isFriday && row.prayerName.equals("Zuhr", ignoreCase = true)
+                val displayName = if (isZuhrOnFriday) "Zuhr (Jummah)" else row.prayerName
+                val displayIqamah = if (isZuhrOnFriday) "See Above" else (row.iqamah ?: "\u2014")
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                TimeColumn(label = "Begins", value = row.begins)
-                Spacer(modifier = Modifier.width(24.dp))
-                TimeColumn(label = "Iqamah", value = displayIqamah)
+                TimetableRow(
+                    prayerName = displayName,
+                    begins = row.begins,
+                    iqamah = displayIqamah,
+                    isActive = isActive,
+                )
+
+                if (index < rows.size - 1) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
             }
+        }
+    }
+}
+
+/**
+ * A single flat row in the timetable — matching the mockup's `.time-row` style.
+ * Active rows get a left border stripe + tinted background.
+ */
+@Composable
+private fun TimetableRow(
+    prayerName: String,
+    begins: String,
+    iqamah: String,
+    isActive: Boolean,
+) {
+    val primary = MaterialTheme.colorScheme.primary
+    val rowModifier = if (isActive) {
+        Modifier
+            .fillMaxWidth()
+            .background(
+                primary.copy(alpha = 0.12f),
+                RoundedCornerShape(12.dp)
+            )
+            .padding(start = 0.dp)
+    } else {
+        Modifier.fillMaxWidth()
+    }
+
+    Row(
+        modifier = rowModifier
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        // Left side: optional active indicator + prayer name
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (isActive) {
+                Box(
+                    modifier = Modifier
+                        .width(4.dp)
+                        .height(28.dp)
+                        .background(primary, RoundedCornerShape(2.dp))
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+            }
+            Text(
+                text = prayerName,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+
+        // Right side: Begins + Iqamah columns
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(20.dp),
+        ) {
+            TimeColumn(label = "Begins", value = begins)
+            TimeColumn(label = "Iqamah", value = iqamah)
         }
     }
 }
@@ -554,11 +564,15 @@ private fun PrayerCard(
 @Composable
 private fun TimeColumn(label: String, value: String) {
     Column(horizontalAlignment = Alignment.End) {
-        Text(text = label, style = MaterialTheme.typography.labelSmall)
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+        )
         Text(
             text = value,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
         )
     }
 }
