@@ -171,38 +171,45 @@ object ScheduleService {
         val isFriday = date.isFriday()
         val jummahOpt = schedule.jummah
 
-        // (prayer, start, end) windows, in chronological order; only those fully defined.
+        // Standard windows spanning the whole period (Zuhr spans zuhr to asr)
         val windows = buildList {
             if (fajr != null) add(StatusWindow(Prayer.Isha, midnight, fajr))            // carryover
             if (fajr != null && sunrise != null) add(StatusWindow(Prayer.Fajr, fajr, sunrise))
-            if (isFriday && jummahOpt is Option.Some && asr != null) {
-                val jummah = jummahOpt.value
-                jummah.jamaahTimes.forEachIndexed { index, time ->
-                    val start = DateTime.of(date, time)
-                    val end = start.plusMinutes(30)
-                    val nextStart = if (index + 1 < jummah.jamaahTimes.size) DateTime.of(date, jummah.jamaahTimes[index + 1]) else asr
-                    val cappedEnd = if (end > nextStart) nextStart else end
-                    val label = if (jummah.jamaahTimes.size == 1) "Jummah" else "Jummah ${index + 1}"
-                    add(StatusWindow(Prayer.Zuhr, start, cappedEnd, label))
-                }
-            } else {
-                if (zuhr != null && asr != null) add(StatusWindow(Prayer.Zuhr, zuhr, asr))
-            }
+            if (zuhr != null && asr != null) add(StatusWindow(Prayer.Zuhr, zuhr, asr))
             if (asr != null && maghrib != null) add(StatusWindow(Prayer.Asr, asr, maghrib))
             if (maghrib != null && isha != null) add(StatusWindow(Prayer.Maghrib, maghrib, isha))
             if (isha != null && nextDayFajr != null) add(StatusWindow(Prayer.Isha, isha, nextDayFajr))
         }
 
-        // Inside a window [start, end) -> Active.
+        // Overlay Jummah windows
+        val jummahWindows = buildList {
+            if (isFriday && jummahOpt is Option.Some && asr != null) {
+                val jummah = jummahOpt.value
+                jummah.jamaahTimes.forEachIndexed { index, time ->
+                    val start = DateTime.of(date, time)
+                    val end = start.plusMinutes(15)
+                    val cappedEnd = if (end > asr) asr else end
+                    val label = if (jummah.jamaahTimes.size == 1) "Jummah" else "Jummah ${index + 1}"
+                    add(StatusWindow(Prayer.Zuhr, start, cappedEnd, label))
+                }
+            }
+        }
+
+        // 1. Check if inside an Active Jummah window (overlay takes precedence)
+        jummahWindows.firstOrNull { now >= it.start && now < it.end }
+            ?.let { return PrayerStatus.Active(it.prayer, it.start, it.end, it.customName) }
+
+        // 2. Check if inside a standard Active window (e.g. Zuhr overarching period)
         windows.firstOrNull { now >= it.start && now < it.end }
             ?.let { return PrayerStatus.Active(it.prayer, it.start, it.end, it.customName) }
 
-        // Earliest window starting strictly after now -> Upcoming.
+        // Earliest standard window starting strictly after now -> Upcoming.
+        // We only check standard windows for 'Upcoming' so we don't show "Jummah begins in" while in Zuhr gap.
         val upcoming = windows.filter { it.start > now }
             .minByOrNull { it.start }
             ?: return PrayerStatus.None
 
-        // windowStartsAt = latest preceding window-end that is <= now, else midnight.
+        // windowStartsAt = latest preceding standard window-end that is <= now, else midnight.
         val windowStart = windows
             .map { it.end }
             .filter { it <= now }

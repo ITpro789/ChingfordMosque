@@ -106,13 +106,10 @@ fun PrayerTimesScreen(
             MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
         ),
     )
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
+    
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
                 .background(appBackground)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 12.dp),
@@ -152,8 +149,8 @@ fun PrayerTimesScreen(
             }
 
             Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
         }
-    }
 }
 
 /**
@@ -232,6 +229,7 @@ private fun CountdownHero(
                 Spacer(modifier = Modifier.height(16.dp))
             }
             
+            Spacer(modifier = Modifier.height(12.dp))
             CircularCountdownRing(next = next)
         }
     }
@@ -260,7 +258,7 @@ private fun CircularCountdownRing(next: NextPrayerViewState) {
 
     Box(
         modifier = Modifier
-            .widthIn(max = 170.dp)
+            .widthIn(max = 250.dp)
             .fillMaxWidth()
             .aspectRatio(1f),
         contentAlignment = Alignment.Center,
@@ -617,7 +615,8 @@ private fun JummahCard(jummah: JummahSectionViewState) {
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
-                    if (jummah.activeIndex != null) {
+                    val hasAnyActive = jummah.statuses.any { it == JummahSectionViewState.JummahStatus.Active }
+                    if (hasAnyActive) {
                         Box(
                             modifier = Modifier
                                 .background(activeColor, RoundedCornerShape(6.dp))
@@ -638,7 +637,8 @@ private fun JummahCard(jummah: JummahSectionViewState) {
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     jummah.times.forEachIndexed { index, time ->
-                        val isHighlighted = index == jummah.activeIndex
+                        val status = jummah.statuses.getOrNull(index) ?: JummahSectionViewState.JummahStatus.Upcoming
+                        val isHighlighted = status == JummahSectionViewState.JummahStatus.Active
                         val label = when (index) {
                             0 -> "1st"
                             1 -> "2nd"
@@ -704,8 +704,7 @@ private fun JummahCard(jummah: JummahSectionViewState) {
                                             color = activeColor
                                         )
                                     } else {
-                                        val activeIdx = jummah.activeIndex
-                                        val statusText = if (activeIdx != null && index < activeIdx) "Done" else "Upcoming"
+                                        val statusText = if (status == JummahSectionViewState.JummahStatus.Done) "Done" else "Upcoming"
                                         Text(
                                             text = statusText,
                                             style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),

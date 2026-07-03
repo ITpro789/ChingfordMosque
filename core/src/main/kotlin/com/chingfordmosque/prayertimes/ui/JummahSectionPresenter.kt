@@ -34,33 +34,28 @@ object JummahSectionPresenter {
         is Option.None -> JummahSectionViewState.Hidden
         is Option.Some -> {
             val times = jummah.value.jamaahTimes
-            val highlightIndex = if (now != null && date != null && date.isFriday()) {
-                getHighlightIndex(times, now)
+            val statuses = if (now != null && date != null && date.isFriday()) {
+                val timeNow = now.timeOfDay
+                times.map { time ->
+                    val start = time
+                    val end = com.chingfordmosque.prayertimes.domain.Time.ofMinutes(
+                        (start.minutesSinceMidnight + 15) % com.chingfordmosque.prayertimes.domain.Time.MINUTES_PER_DAY
+                    ).getOrThrow()
+                    if (timeNow >= end) {
+                        JummahSectionViewState.JummahStatus.Done
+                    } else if (timeNow >= start && timeNow < end) {
+                        JummahSectionViewState.JummahStatus.Active
+                    } else {
+                        JummahSectionViewState.JummahStatus.Upcoming
+                    }
+                }
             } else {
-                null
+                List(times.size) { JummahSectionViewState.JummahStatus.Upcoming }
             }
             JummahSectionViewState.Visible(
                 times = times.map { it.toString() },
-                activeIndex = highlightIndex,
+                statuses = statuses,
             )
         }
-    }
-
-    private fun getHighlightIndex(
-        times: List<com.chingfordmosque.prayertimes.domain.Time>,
-        now: DateTime,
-    ): Int {
-        val timeNow = now.timeOfDay
-        for (i in 0 until times.size - 1) {
-            val tCurr = times[i]
-            val tNext = times[i + 1]
-            if (timeNow >= tCurr && timeNow < tNext) {
-                return i
-            }
-        }
-        if (timeNow >= times.last()) {
-            return times.size - 1
-        }
-        return 0
     }
 }
