@@ -225,10 +225,10 @@ class EndToEndRefreshIntegrationTest : StringSpec({
         session2.state.nextPrayer.getOrNull()?.prayer shouldBe Prayer.Maghrib
         session2.state.error shouldBe Option.None
 
-        // Re-arming reflects the remaining-after-now prayers only: Zuhr and Asr (now past) are
-        // gone, leaving exactly Maghrib and Isha — and no duplicates.
+        // Re-arming reflects the remaining-after-now prayers only: Zuhr (now past) is
+        // gone, leaving exactly Asr (triggers 19:30), Maghrib (21:24), and Isha (22:30) — and no duplicates.
         val pending = alarmPort.pending()
-        pending.map { it.prayer } shouldContainExactly listOf(Prayer.Maghrib, Prayer.Isha)
+        pending.map { it.prayer } shouldContainExactly listOf(Prayer.Asr, Prayer.Maghrib, Prayer.Isha)
         pending.map { it.id }.toSet() shouldHaveSize pending.size
     }
 })

@@ -102,9 +102,8 @@ class AppContainerTest : StringSpec({
         sunrise.isInformational shouldBe true
         sunrise.iqamah shouldBe null
 
-        // Jummah section visible with the three ascending jamā'ah times from the fixture.
-        val jummah = app.jummahSectionViewState().shouldBeInstanceOf<JummahSectionViewState.Visible>()
-        jummah.times shouldContainExactly listOf("13:20", "14:00", "14:30")
+        // Jummah section is hidden on Tuesday (non-Friday)
+        app.jummahSectionViewState().shouldBeInstanceOf<JummahSectionViewState.Hidden>()
 
         // Next-prayer panel: Zuhr with a countdown, a manual-refresh control, and no error.
         val next = app.nextPrayerViewState()

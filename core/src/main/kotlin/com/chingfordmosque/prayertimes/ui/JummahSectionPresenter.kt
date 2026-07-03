@@ -36,30 +36,31 @@ object JummahSectionPresenter {
         }
         return when (jummah) {
             is Option.None -> JummahSectionViewState.Hidden
-        is Option.Some -> {
-            val times = jummah.value.jamaahTimes
-            val statuses = if (now != null && date != null && date.isFriday()) {
-                val timeNow = now.timeOfDay
-                times.map { time ->
-                    val start = time
-                    val end = com.chingfordmosque.prayertimes.domain.Time.ofMinutes(
-                        (start.minutesSinceMidnight + 15) % com.chingfordmosque.prayertimes.domain.Time.MINUTES_PER_DAY
-                    ).getOrThrow()
-                    if (timeNow >= end) {
-                        JummahSectionViewState.JummahStatus.Done
-                    } else if (timeNow >= start && timeNow < end) {
-                        JummahSectionViewState.JummahStatus.Active
-                    } else {
-                        JummahSectionViewState.JummahStatus.Upcoming
+            is Option.Some -> {
+                val times = jummah.value.jamaahTimes
+                val statuses = if (now != null && date != null && date.isFriday()) {
+                    val timeNow = now.timeOfDay
+                    times.map { time ->
+                        val start = time
+                        val end = com.chingfordmosque.prayertimes.domain.Time.ofMinutes(
+                            (start.minutesSinceMidnight + 15) % com.chingfordmosque.prayertimes.domain.Time.MINUTES_PER_DAY
+                        ).getOrThrow()
+                        if (timeNow >= end) {
+                            JummahSectionViewState.JummahStatus.Done
+                        } else if (timeNow >= start && timeNow < end) {
+                            JummahSectionViewState.JummahStatus.Active
+                        } else {
+                            JummahSectionViewState.JummahStatus.Upcoming
+                        }
                     }
+                } else {
+                    List(times.size) { JummahSectionViewState.JummahStatus.Upcoming }
                 }
-            } else {
-                List(times.size) { JummahSectionViewState.JummahStatus.Upcoming }
+                JummahSectionViewState.Visible(
+                    times = times.map { it.toString() },
+                    statuses = statuses,
+                )
             }
-            JummahSectionViewState.Visible(
-                times = times.map { it.toString() },
-                statuses = statuses,
-            )
         }
     }
 }

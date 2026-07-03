@@ -229,18 +229,18 @@ class AdhanSchedulerPreferencesTest : StringSpec({
         val pending = port.pending()
         
         // Fajr: 5:30 Iqamah - 15 mins = 5:15
-        pending.first { it.prayer == Prayer.Fajr }.firesAt.time.toString() shouldBe "05:15"
+        pending.first { it.prayer == Prayer.Fajr }.firesAt.timeOfDay.toString() shouldBe "05:15"
         
         // Zuhr: 13:30 Iqamah - 15 mins = 13:15
-        pending.first { it.prayer == Prayer.Zuhr }.firesAt.time.toString() shouldBe "13:15"
+        pending.first { it.prayer == Prayer.Zuhr }.firesAt.timeOfDay.toString() shouldBe "13:15"
         
         // Asr: 15:10 Iqamah - 15 mins = 14:55 (clamped to begins 15:00)
-        pending.first { it.prayer == Prayer.Asr }.firesAt.time.toString() shouldBe "15:00"
+        pending.first { it.prayer == Prayer.Asr }.firesAt.timeOfDay.toString() shouldBe "15:00"
         
         // Maghrib: 18:15 Iqamah, but Maghrib starts at begins (18:00)
-        pending.first { it.prayer == Prayer.Maghrib }.firesAt.time.toString() shouldBe "18:00"
+        pending.first { it.prayer == Prayer.Maghrib }.firesAt.timeOfDay.toString() shouldBe "18:00"
         
         // Isha: 20:45 Iqamah - 15 mins = 20:30
-        pending.first { it.prayer == Prayer.Isha }.firesAt.time.toString() shouldBe "20:30"
+        pending.first { it.prayer == Prayer.Isha }.firesAt.timeOfDay.toString() shouldBe "20:30"
     }
 })

@@ -83,7 +83,21 @@ class NoDuplicateAlertsPropertyTest : StringSpec({
     fun remainingAlerting(schedule: DaySchedule, now: DateTime): List<PrayerTime> =
         schedule.prayers
             .filter { it.prayer.isAlerting }
-            .filter { DateTime.of(schedule.scheduleDate, it.beginsAt) > now }
+            .filter { prayerTime ->
+                val begins = prayerTime.beginsAt
+                val adhanTime = if (prayerTime.prayer == Prayer.Maghrib) {
+                    begins
+                } else {
+                    when (val iqamahOpt = prayerTime.iqamahAt) {
+                        is Option.Some -> {
+                            val calculated = iqamahOpt.value.minusMinutes(15)
+                            if (calculated < begins) begins else calculated
+                        }
+                        is Option.None -> begins
+                    }
+                }
+                DateTime.of(schedule.scheduleDate, adhanTime) > now
+            }
 
     "Property 5: reschedule arms at most one alert per (prayer, date) and exactly the remaining alerting prayers" {
         checkAll(validScheduleArb(date), nowArb, repeatsArb) { schedule, now, repeats ->
