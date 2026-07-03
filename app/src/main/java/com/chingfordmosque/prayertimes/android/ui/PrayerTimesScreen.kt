@@ -187,7 +187,7 @@ private fun CountdownHero(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Image(
-                    painter = painterResource(id = com.chingfordmosque.prayertimes.R.drawable.masjid_logo),
+                    painter = painterResource(id = com.chingfordmosque.prayertimes.android.R.drawable.masjid_logo),
                     contentDescription = "Chingford Masjid Logo",
                     modifier = Modifier.height(36.dp)
                 )
