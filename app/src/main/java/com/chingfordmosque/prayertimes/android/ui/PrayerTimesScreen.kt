@@ -492,7 +492,7 @@ private fun PrayerTimetable(
                 val isZuhrOnFriday = isFriday && row.prayerName.equals("Zuhr", ignoreCase = true)
                 val isActive = row.prayerName == activeName || (isZuhrOnFriday && activeName?.startsWith("Jummah") == true)
                 val displayName = if (isZuhrOnFriday) "Zuhr (Jummah)" else row.prayerName
-                val displayIqamah = if (isZuhrOnFriday) "See Above" else (row.iqamah ?: "\u2014")
+                val displayIqamah = if (isZuhrOnFriday) "\u2014" else (row.iqamah ?: "\u2014")
 
                 TimetableRow(
                     prayerName = displayName,
@@ -576,7 +576,7 @@ private fun TimeColumn(label: String, value: String, isActive: Boolean = false) 
     Column(horizontalAlignment = Alignment.End) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelSmall.copy(fontSize = if (isActive) 12.sp else 11.sp),
+            style = MaterialTheme.typography.labelSmall.copy(fontSize = if (isActive) 14.sp else 13.sp),
             color = if (isActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
         )
         Text(
@@ -699,11 +699,11 @@ private fun JummahCard(jummah: JummahSectionViewState) {
                                             imageVector = Icons.Default.Check,
                                             contentDescription = null,
                                             tint = activeColor,
-                                            modifier = Modifier.size(13.dp)
+                                            modifier = Modifier.size(15.dp)
                                         )
                                         Text(
                                             text = "Active",
-                                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp),
+                                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 14.sp),
                                             fontWeight = FontWeight.Bold,
                                             maxLines = 1,
                                             color = activeColor
@@ -712,7 +712,7 @@ private fun JummahCard(jummah: JummahSectionViewState) {
                                         val statusText = if (status == JummahSectionViewState.JummahStatus.Done) "Done" else "Upcoming"
                                         Text(
                                             text = statusText,
-                                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
+                                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 13.sp),
                                             maxLines = 1,
                                             color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.45f)
                                         )
