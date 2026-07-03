@@ -36,6 +36,14 @@ class AdhanPlaybackService : Service() {
         startForegroundServiceNotification(prayerName, "Checking live stream...")
 
         serviceScope.launch {
+            // Safety timeout: automatically stop the service after 10 minutes
+            launch {
+                delay(10 * 60 * 1000L) // 10 minutes
+                withContext(Dispatchers.Main) {
+                    stopPlaybackAndService()
+                }
+            }
+
             val liveUrl = checkLiveStreamUrl()
             withContext(Dispatchers.Main) {
                 if (liveUrl != null) {
