@@ -30,8 +30,12 @@ object JummahSectionPresenter {
         jummah: Option<JummahTimes>,
         date: com.chingfordmosque.prayertimes.domain.Date? = null,
         now: DateTime? = null,
-    ): JummahSectionViewState = when (jummah) {
-        is Option.None -> JummahSectionViewState.Hidden
+    ): JummahSectionViewState {
+        if (date != null && !date.isFriday()) {
+            return JummahSectionViewState.Hidden
+        }
+        return when (jummah) {
+            is Option.None -> JummahSectionViewState.Hidden
         is Option.Some -> {
             val times = jummah.value.jamaahTimes
             val statuses = if (now != null && date != null && date.isFriday()) {

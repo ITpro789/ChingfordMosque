@@ -95,6 +95,26 @@ class JummahSectionPresenterTest : StringSpec({
         state.shouldBeInstanceOf<JummahSectionViewState.Hidden>()
     }
 
+    "present(schedule) hides the section on non-Fridays even if jummah data is present" {
+        val saturdayDate = Date.of(2024, 6, 15).getOrThrow() // Saturday
+        val jummah = JummahTimes.of(listOf(time(13, 20))).getOrThrow()
+        val schedule = DaySchedule.of(
+            scheduleDate = saturdayDate,
+            prayers = listOf(
+                pt(Prayer.Fajr, 5, 0),
+                pt(Prayer.Sunrise, 6, 30),
+                pt(Prayer.Zuhr, 12, 0),
+                pt(Prayer.Asr, 15, 0),
+                pt(Prayer.Maghrib, 18, 0),
+                pt(Prayer.Isha, 20, 0),
+            ),
+            jummah = Option.Some(jummah),
+        ).getOrThrow()
+
+        val state = JummahSectionPresenter.present(schedule)
+        state.shouldBeInstanceOf<JummahSectionViewState.Hidden>()
+    }
+
     "the visible list preserves the ascending order of the underlying times" {
         val jummah = JummahTimes.of(listOf(time(12, 45), time(13, 30), time(14, 15))).getOrThrow()
 
