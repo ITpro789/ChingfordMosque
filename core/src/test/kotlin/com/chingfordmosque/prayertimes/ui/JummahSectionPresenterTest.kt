@@ -45,7 +45,10 @@ class JummahSectionPresenterTest : StringSpec({
 
         val state = JummahSectionPresenter.present(Option.Some(jummah))
 
-        state shouldBe JummahSectionViewState.Visible(listOf("13:20", "14:00", "14:30"))
+        state shouldBe JummahSectionViewState.Visible(
+            listOf("13:20", "14:00", "14:30"),
+            List(3) { JummahSectionViewState.JummahStatus.Upcoming }
+        )
     }
 
     "times are formatted as zero-padded HH:mm" {
@@ -53,14 +56,20 @@ class JummahSectionPresenterTest : StringSpec({
 
         val state = JummahSectionPresenter.present(Option.Some(jummah))
 
-        state shouldBe JummahSectionViewState.Visible(listOf("09:05", "13:00"))
+        state shouldBe JummahSectionViewState.Visible(
+            listOf("09:05", "13:00"),
+            List(2) { JummahSectionViewState.JummahStatus.Upcoming }
+        )
     }
 
     "Visible with a single jamā'ah time" {
         val jummah = JummahTimes.of(listOf(time(13, 15))).getOrThrow()
 
         JummahSectionPresenter.present(Option.Some(jummah)) shouldBe
-            JummahSectionViewState.Visible(listOf("13:15"))
+            JummahSectionViewState.Visible(
+                listOf("13:15"),
+                listOf(JummahSectionViewState.JummahStatus.Upcoming)
+            )
     }
 
     "Hidden when Jummah data is unavailable (Option.None)" {
@@ -72,7 +81,10 @@ class JummahSectionPresenterTest : StringSpec({
         val schedule = scheduleWith(Option.Some(jummah))
 
         JummahSectionPresenter.present(schedule) shouldBe
-            JummahSectionViewState.Visible(listOf("13:20", "14:00"))
+            JummahSectionViewState.Visible(
+                listOf("13:20", "14:00"),
+                List(2) { JummahSectionViewState.JummahStatus.Upcoming }
+            )
     }
 
     "present(schedule) hides the section when the schedule has no jummah" {

@@ -114,7 +114,10 @@ class ViewStateFormattingTest : StringSpec({
 
         val state = JummahSectionPresenter.present(shuffledSchedule(Option.Some(jummah)))
 
-        state shouldBe JummahSectionViewState.Visible(listOf("13:05", "14:00", "14:30"))
+        state shouldBe JummahSectionViewState.Visible(
+            listOf("13:05", "14:00", "14:30"),
+            List(3) { JummahSectionViewState.JummahStatus.Upcoming }
+        )
     }
 
     // --- Stale / error indicator visibility & countdown formatting (Requirement 6.4, 4.3) ---

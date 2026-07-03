@@ -69,46 +69,47 @@ class FridayJummahServiceTest : StringSpec({
         prayerTime.beginsAt shouldBe Time.of(17, 15).getOrThrow()
     }
 
-    "getPrayerStatus on Friday before Jummah 1 -> Upcoming Jummah 1" {
+    "getPrayerStatus on Friday before Zuhr -> Upcoming Zuhr" {
         val status = ScheduleService.getPrayerStatus(fridaySchedule, dt(friday, 11, 0))
         val upcoming = status.shouldBeInstanceOf<PrayerStatus.Upcoming>()
-        upcoming.customName shouldBe "Jummah 1"
-        upcoming.name shouldBe "Jummah 1"
-        upcoming.beginsAt shouldBe dt(friday, 13, 20)
+        upcoming.customName shouldBe null
+        upcoming.name shouldBe "Zuhr"
+        upcoming.beginsAt shouldBe dt(friday, 13, 0)
     }
 
-    "getPrayerStatus on Friday during Jummah 1 (13:20 - 13:50) -> Active Jummah 1" {
+    "getPrayerStatus on Friday during Jummah 1 (13:20 - 13:35) -> Active Jummah 1" {
         val status = ScheduleService.getPrayerStatus(fridaySchedule, dt(friday, 13, 25))
         val active = status.shouldBeInstanceOf<PrayerStatus.Active>()
         active.customName shouldBe "Jummah 1"
         active.name shouldBe "Jummah 1"
         active.startsAt shouldBe dt(friday, 13, 20)
-        active.endsAt shouldBe dt(friday, 13, 50)
+        active.endsAt shouldBe dt(friday, 13, 35)
     }
 
-    "getPrayerStatus on Friday in gap between Jummah 1 end and Jummah 2 start (13:50 - 14:00) -> Upcoming Jummah 2" {
+    "getPrayerStatus on Friday in gap between Jummah 1 end and Jummah 2 start (13:35 - 14:00) -> Active Zuhr" {
         val status = ScheduleService.getPrayerStatus(fridaySchedule, dt(friday, 13, 55))
-        val upcoming = status.shouldBeInstanceOf<PrayerStatus.Upcoming>()
-        upcoming.customName shouldBe "Jummah 2"
-        upcoming.name shouldBe "Jummah 2"
-        upcoming.beginsAt shouldBe dt(friday, 14, 0)
+        val active = status.shouldBeInstanceOf<PrayerStatus.Active>()
+        active.customName shouldBe null
+        active.name shouldBe "Zuhr"
+        active.startsAt shouldBe dt(friday, 13, 0)
     }
 
-    "getPrayerStatus on Friday during Jummah 2 (14:00 - 14:30) -> Active Jummah 2" {
-        val status = ScheduleService.getPrayerStatus(fridaySchedule, dt(friday, 14, 15))
+    "getPrayerStatus on Friday during Jummah 2 (14:00 - 14:15) -> Active Jummah 2" {
+        val status = ScheduleService.getPrayerStatus(fridaySchedule, dt(friday, 14, 10))
         val active = status.shouldBeInstanceOf<PrayerStatus.Active>()
         active.customName shouldBe "Jummah 2"
         active.name shouldBe "Jummah 2"
         active.startsAt shouldBe dt(friday, 14, 0)
-        active.endsAt shouldBe dt(friday, 14, 30)
+        active.endsAt shouldBe dt(friday, 14, 15)
     }
 
-    "getPrayerStatus on Friday after last Jummah finishes (14:30+) -> Upcoming Asr" {
+    "getPrayerStatus on Friday after last Jummah finishes (14:15+) -> Active Zuhr until Asr" {
         val status = ScheduleService.getPrayerStatus(fridaySchedule, dt(friday, 15, 0))
-        val upcoming = status.shouldBeInstanceOf<PrayerStatus.Upcoming>()
-        upcoming.prayer shouldBe Prayer.Asr
-        upcoming.customName shouldBe null
-        upcoming.name shouldBe "Asr"
-        upcoming.beginsAt shouldBe dt(friday, 17, 15)
+        val active = status.shouldBeInstanceOf<PrayerStatus.Active>()
+        active.prayer shouldBe Prayer.Zuhr
+        active.customName shouldBe null
+        active.name shouldBe "Zuhr"
+        active.startsAt shouldBe dt(friday, 13, 0)
+        active.endsAt shouldBe dt(friday, 17, 15)
     }
 })
