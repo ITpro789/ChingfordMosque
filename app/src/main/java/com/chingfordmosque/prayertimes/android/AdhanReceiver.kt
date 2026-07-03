@@ -46,37 +46,7 @@ class AdhanReceiver : BroadcastReceiver() {
         }
 
         if (playSound) {
-            playAdhan(context)
-        }
-    }
-
-    private fun playAdhan(context: Context) {
-        // Prefer a bundled raw adhan resource resolved by name; fall back to the default tone.
-        val rawId = context.resources.getIdentifier("adhan", "raw", context.packageName)
-        val soundUri: Uri = if (rawId != 0) {
-            Uri.parse("android.resource://${context.packageName}/$rawId")
-        } else {
-            RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-        }
-
-        try {
-            val player = MediaPlayer()
-            player.setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .build(),
-            )
-            player.setDataSource(context, soundUri)
-            player.setOnCompletionListener { mp -> mp.release() }
-            player.setOnErrorListener { mp, _, _ ->
-                mp.release()
-                true
-            }
-            player.prepare()
-            player.start()
-        } catch (_: Exception) {
-            // Audio is best-effort; the visible notification is the primary alert.
+            AdhanPlaybackService.start(context, prayerName)
         }
     }
 }
