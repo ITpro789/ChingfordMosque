@@ -3,6 +3,7 @@ package com.chingfordmosque.prayertimes.android.ui
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -311,25 +312,25 @@ private fun RingCenter(next: NextPrayerViewState) {
         if (name != null && countdown != null) {
             if (next.ringIsActive) {
                 NowBadge()
-                Spacer(modifier = Modifier.height(2.dp))
+                Spacer(modifier = Modifier.height(6.dp))
             }
             Text(
                 text = name,
-                style = MaterialTheme.typography.titleMedium.copy(fontSize = 16.sp),
+                style = MaterialTheme.typography.titleLarge.copy(fontSize = 22.sp),
                 color = ringTextColor,
                 fontWeight = FontWeight.ExtraBold,
                 maxLines = 1,
             )
             next.ringCaption?.let { caption ->
-                Spacer(modifier = Modifier.height(2.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = caption,
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                    style = MaterialTheme.typography.labelLarge.copy(fontSize = 12.sp),
                     color = ringTextColor.copy(alpha = 0.6f),
                     letterSpacing = 1.sp,
                 )
             }
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = countdown,
                 style = CountdownTextStyle,
@@ -523,11 +524,14 @@ private fun TimetableRow(
     val rowModifier = if (isActive) {
         Modifier
             .fillMaxWidth()
-            .background(
-                primary.copy(alpha = 0.12f),
+            .border(
+                BorderStroke(1.dp, primary.copy(alpha = 0.4f)),
                 RoundedCornerShape(12.dp)
             )
-            .padding(start = 0.dp)
+            .background(
+                primary.copy(alpha = 0.22f),
+                RoundedCornerShape(12.dp)
+            )
     } else {
         Modifier.fillMaxWidth()
     }
@@ -551,9 +555,9 @@ private fun TimetableRow(
             }
             Text(
                 text = prayerName,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface,
+                style = if (isActive) MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp) else MaterialTheme.typography.bodyLarge,
+                fontWeight = if (isActive) FontWeight.Bold else FontWeight.SemiBold,
+                color = if (isActive) primary else MaterialTheme.colorScheme.onSurface,
             )
         }
 
@@ -561,24 +565,25 @@ private fun TimetableRow(
         Row(
             horizontalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            TimeColumn(label = "Begins", value = begins)
-            TimeColumn(label = "Iqamah", value = iqamah)
+            TimeColumn(label = "Begins", value = begins, isActive = isActive)
+            TimeColumn(label = "Iqamah", value = iqamah, isActive = isActive)
         }
     }
 }
 
 @Composable
-private fun TimeColumn(label: String, value: String) {
+private fun TimeColumn(label: String, value: String, isActive: Boolean = false) {
     Column(horizontalAlignment = Alignment.End) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+            style = MaterialTheme.typography.labelSmall.copy(fontSize = if (isActive) 11.sp else 10.sp),
+            color = if (isActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
         )
         Text(
             text = value,
-            style = MaterialTheme.typography.bodyMedium,
+            style = if (isActive) MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp) else MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
         )
     }
 }
