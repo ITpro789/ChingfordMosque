@@ -189,7 +189,8 @@ private fun CountdownHero(
                 Image(
                     painter = painterResource(id = com.chingfordmosque.prayertimes.android.R.drawable.masjid_logo),
                     contentDescription = "Chingford Masjid Logo",
-                    modifier = Modifier.height(36.dp)
+                    modifier = Modifier.height(36.dp),
+                    colorFilter = if (androidx.compose.foundation.isSystemInDarkTheme()) androidx.compose.ui.graphics.ColorFilter.tint(Color.White) else null
                 )
                 if (isRefreshing) {
                     CircularProgressIndicator(
