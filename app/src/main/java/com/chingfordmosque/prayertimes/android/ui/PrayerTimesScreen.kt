@@ -66,6 +66,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -184,11 +186,10 @@ private fun CountdownHero(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = "Chingford Mosque",
-                    style = MaterialTheme.typography.titleMedium.copy(fontSize = 20.sp),
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onBackground,
+                Image(
+                    painter = painterResource(id = com.chingfordmosque.prayertimes.R.drawable.masjid_logo),
+                    contentDescription = "Chingford Masjid Logo",
+                    modifier = Modifier.height(36.dp)
                 )
                 if (isRefreshing) {
                     CircularProgressIndicator(
