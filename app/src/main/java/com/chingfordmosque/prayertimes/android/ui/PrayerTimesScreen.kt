@@ -186,7 +186,7 @@ private fun CountdownHero(
             ) {
                 Text(
                     text = "Chingford Mosque",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleMedium.copy(fontSize = 20.sp),
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
@@ -222,7 +222,7 @@ private fun CountdownHero(
                 }
                 Text(
                     text = combinedText,
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 13.sp),
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
@@ -316,7 +316,7 @@ private fun RingCenter(next: NextPrayerViewState) {
             }
             Text(
                 text = name,
-                style = MaterialTheme.typography.titleLarge.copy(fontSize = 22.sp),
+                style = MaterialTheme.typography.titleLarge.copy(fontSize = 28.sp),
                 color = ringTextColor,
                 fontWeight = FontWeight.ExtraBold,
                 maxLines = 1,
@@ -555,7 +555,7 @@ private fun TimetableRow(
             }
             Text(
                 text = prayerName,
-                style = if (isActive) MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp) else MaterialTheme.typography.bodyLarge,
+                style = if (isActive) MaterialTheme.typography.bodyLarge.copy(fontSize = 22.sp) else MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
                 fontWeight = if (isActive) FontWeight.Bold else FontWeight.SemiBold,
                 color = if (isActive) primary else MaterialTheme.colorScheme.onSurface,
             )
@@ -576,12 +576,12 @@ private fun TimeColumn(label: String, value: String, isActive: Boolean = false) 
     Column(horizontalAlignment = Alignment.End) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelSmall.copy(fontSize = if (isActive) 11.sp else 10.sp),
+            style = MaterialTheme.typography.labelSmall.copy(fontSize = if (isActive) 12.sp else 11.sp),
             color = if (isActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
         )
         Text(
             text = value,
-            style = if (isActive) MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp) else MaterialTheme.typography.bodyMedium,
+            style = if (isActive) MaterialTheme.typography.bodyMedium.copy(fontSize = 20.sp) else MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp),
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
         )
@@ -616,7 +616,7 @@ private fun JummahCard(jummah: JummahSectionViewState) {
                 ) {
                     Text(
                         text = "Jummah Congregations",
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleMedium.copy(fontSize = 20.sp),
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -677,7 +677,7 @@ private fun JummahCard(jummah: JummahSectionViewState) {
                             ) {
                                 Text(
                                     text = "$label Jamā'ah",
-                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
+                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 13.sp),
                                     fontWeight = FontWeight.SemiBold,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
@@ -685,7 +685,7 @@ private fun JummahCard(jummah: JummahSectionViewState) {
                                 )
                                 Text(
                                     text = time,
-                                    style = MaterialTheme.typography.titleMedium.copy(fontSize = 17.sp),
+                                    style = MaterialTheme.typography.titleMedium.copy(fontSize = if (isHighlighted) 22.sp else 20.sp),
                                     fontWeight = FontWeight.Bold,
                                     maxLines = 1,
                                     color = if (isHighlighted) activeColor else MaterialTheme.colorScheme.onSecondaryContainer
@@ -699,11 +699,11 @@ private fun JummahCard(jummah: JummahSectionViewState) {
                                             imageVector = Icons.Default.Check,
                                             contentDescription = null,
                                             tint = activeColor,
-                                            modifier = Modifier.size(11.dp)
+                                            modifier = Modifier.size(13.dp)
                                         )
                                         Text(
                                             text = "Active",
-                                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp),
                                             fontWeight = FontWeight.Bold,
                                             maxLines = 1,
                                             color = activeColor
@@ -712,7 +712,7 @@ private fun JummahCard(jummah: JummahSectionViewState) {
                                         val statusText = if (status == JummahSectionViewState.JummahStatus.Done) "Done" else "Upcoming"
                                         Text(
                                             text = statusText,
-                                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
                                             maxLines = 1,
                                             color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.45f)
                                         )
@@ -761,7 +761,7 @@ private fun JummahCard(jummah: JummahSectionViewState) {
                 ) {
                     Text(
                         text = "✨ Friday Sunnahs & Prep Guide",
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp),
                         fontWeight = FontWeight.SemiBold,
                     )
                     Icon(
@@ -790,14 +790,14 @@ private fun JummahCard(jummah: JummahSectionViewState) {
                             Column {
                                 Text(
                                     text = title,
-                                    style = MaterialTheme.typography.bodyMedium,
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 16.sp),
                                     fontWeight = FontWeight.SemiBold,
                                     textDecoration = if (checked) androidx.compose.ui.text.style.TextDecoration.LineThrough else null,
                                     color = if (checked) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
                                     text = description,
-                                    style = Modifier.align(Alignment.Start).let { MaterialTheme.typography.bodySmall },
+                                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 14.sp),
                                     color = if (checked) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                 )
                             }

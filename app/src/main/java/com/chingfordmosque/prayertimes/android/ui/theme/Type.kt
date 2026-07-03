@@ -41,6 +41,6 @@ val AppTypography = Typography().run {
 val CountdownTextStyle: TextStyle = TextStyle(
     fontFamily = FontFamily.Monospace,
     fontWeight = FontWeight.Bold,
-    fontSize = 34.sp,
+    fontSize = 46.sp,
     letterSpacing = 0.5.sp,
 )
