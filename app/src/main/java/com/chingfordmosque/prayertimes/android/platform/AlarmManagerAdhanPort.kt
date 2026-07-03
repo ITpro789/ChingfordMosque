@@ -99,7 +99,7 @@ class AlarmManagerAdhanPort(
             data = Uri.parse("chingfordmosque://adhan/${id.value}")
             putExtra(EXTRA_ALERT_ID, id.value)
             if (alert != null) {
-                putExtra(EXTRA_PRAYER_NAME, alert.prayer.name)
+                putExtra(EXTRA_PRAYER_NAME, alert.label)
                 putExtra(EXTRA_PLAY_SOUND, alert.playAdhanSound)
             }
         }

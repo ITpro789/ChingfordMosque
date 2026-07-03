@@ -28,30 +28,69 @@ class AdhanNotificationScheduler(
         port.cancelAll()
 
         val playSound = preferences.playAdhanSound
+        val isFriday = schedule.scheduleDate.isFriday()
+        val jummahOpt = schedule.jummah
 
-        schedule.prayers
-            // Sunrise is informational only and must never alert (Requirement 5.6).
-            .filter { it.prayer.isAlerting }
-            // Honour per-prayer enable/disable (Requirement 5.4).
-            .filter { preferences.isEnabled(it.prayer) }
-            .forEach { prayerTime ->
-                val firesAt = DateTime.of(schedule.scheduleDate, prayerTime.beginsAt)
-                // Only arm prayers that are still upcoming relative to now (Requirement 5.1):
-                // a begin instant at or before now has already passed and is not re-armed.
-                if (firesAt > now) {
-                    port.schedule(
-                        ScheduledAdhanAlert(
-                            id = AlertId.of(prayerTime.prayer, schedule.scheduleDate),
-                            prayer = prayerTime.prayer,
-                            date = schedule.scheduleDate,
-                            firesAt = firesAt,
-                            // The payload identifies the prayer (Requirement 5.2) and whether to
-                            // play adhan audio (Requirement 5.3); rendering/audio is the binding's job.
-                            playAdhanSound = playSound,
-                        ),
-                    )
+        if (isFriday && jummahOpt is com.chingfordmosque.prayertimes.domain.Option.Some) {
+            val jummah = jummahOpt.value
+            // Schedule non-Zuhr alerting prayers
+            schedule.prayers
+                .filter { it.prayer.isAlerting && it.prayer != com.chingfordmosque.prayertimes.domain.Prayer.Zuhr }
+                .filter { preferences.isEnabled(it.prayer) }
+                .forEach { prayerTime ->
+                    val firesAt = DateTime.of(schedule.scheduleDate, prayerTime.beginsAt)
+                    if (firesAt > now) {
+                        port.schedule(
+                            ScheduledAdhanAlert(
+                                id = AlertId.of(prayerTime.prayer, schedule.scheduleDate),
+                                prayer = prayerTime.prayer,
+                                date = schedule.scheduleDate,
+                                firesAt = firesAt,
+                                playAdhanSound = playSound,
+                            )
+                        )
+                    }
+                }
+
+            // Schedule Jummah times in place of Zuhr
+            if (preferences.isEnabled(com.chingfordmosque.prayertimes.domain.Prayer.Zuhr)) {
+                jummah.jamaahTimes.forEachIndexed { index, time ->
+                    val label = if (jummah.jamaahTimes.size == 1) "Jummah" else "Jummah ${index + 1}"
+                    val firesAt = DateTime.of(schedule.scheduleDate, time)
+                    if (firesAt > now) {
+                        port.schedule(
+                            ScheduledAdhanAlert(
+                                id = AlertId.ofCustom(label, schedule.scheduleDate),
+                                prayer = com.chingfordmosque.prayertimes.domain.Prayer.Zuhr,
+                                date = schedule.scheduleDate,
+                                firesAt = firesAt,
+                                playAdhanSound = playSound,
+                                label = label,
+                            )
+                        )
+                    }
                 }
             }
+        } else {
+            // Standard scheduling for non-Fridays
+            schedule.prayers
+                .filter { it.prayer.isAlerting }
+                .filter { preferences.isEnabled(it.prayer) }
+                .forEach { prayerTime ->
+                    val firesAt = DateTime.of(schedule.scheduleDate, prayerTime.beginsAt)
+                    if (firesAt > now) {
+                        port.schedule(
+                            ScheduledAdhanAlert(
+                                id = AlertId.of(prayerTime.prayer, schedule.scheduleDate),
+                                prayer = prayerTime.prayer,
+                                date = schedule.scheduleDate,
+                                firesAt = firesAt,
+                                playAdhanSound = playSound,
+                            )
+                        )
+                    }
+                }
+        }
     }
 
     override fun cancelAll() {

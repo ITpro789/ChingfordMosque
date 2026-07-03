@@ -22,5 +22,8 @@ sealed class JummahSectionViewState {
      * The Jummah section is shown with the listed jamā'ah [times] in ascending chronological
      * order (Requirements 3.1, 3.2). Each entry is a canonical "HH:mm" string.
      */
-    data class Visible(val times: List<String>) : JummahSectionViewState()
+    data class Visible(
+        val times: List<String>,
+        val activeIndex: Int? = null,
+    ) : JummahSectionViewState()
 }

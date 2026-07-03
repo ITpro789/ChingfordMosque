@@ -163,9 +163,9 @@ class AppContainer(
      * with ascending times when present, otherwise [JummahSectionViewState.Hidden] (also when
      * there is no schedule at all).
      */
-    fun jummahSectionViewState(): JummahSectionViewState =
+    fun jummahSectionViewState(now: DateTime = clock.now()): JummahSectionViewState =
         state.schedule.fold(
-            onSome = { JummahSectionPresenter.present(it) },
+            onSome = { JummahSectionPresenter.present(it, now) },
             onNone = { JummahSectionViewState.Hidden },
         )
 

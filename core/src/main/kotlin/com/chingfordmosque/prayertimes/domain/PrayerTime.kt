@@ -16,20 +16,31 @@ class PrayerTime private constructor(
     val prayer: Prayer,
     val beginsAt: Time,
     val iqamahAt: Option<Time>,
+    val customName: String? = null,
 ) {
+
+    val name: String get() = customName ?: prayer.name
 
     override fun equals(other: Any?): Boolean =
         this === other ||
             (other is PrayerTime &&
                 other.prayer == prayer &&
                 other.beginsAt == beginsAt &&
-                other.iqamahAt == iqamahAt)
+                other.iqamahAt == iqamahAt &&
+                other.customName == customName)
 
-    override fun hashCode(): Int = (prayer.hashCode() * 31 + beginsAt.hashCode()) * 31 + iqamahAt.hashCode()
+    override fun hashCode(): Int {
+        var result = prayer.hashCode()
+        result = 31 * result + beginsAt.hashCode()
+        result = 31 * result + iqamahAt.hashCode()
+        result = 31 * result + (customName?.hashCode() ?: 0)
+        return result
+    }
 
     override fun toString(): String {
         val iqamah = iqamahAt.fold(onSome = { " iqamah=$it" }, onNone = { "" })
-        return "PrayerTime($prayer begins=$beginsAt$iqamah)"
+        val custom = customName?.let { " customName=$it" } ?: ""
+        return "PrayerTime($prayer begins=$beginsAt$iqamah$custom)"
     }
 
     companion object {
@@ -44,6 +55,7 @@ class PrayerTime private constructor(
             prayer: Prayer,
             beginsAt: Time,
             iqamahAt: Option<Time> = Option.None,
+            customName: String? = null,
         ): Result<PrayerTime, String> {
             when (iqamahAt) {
                 is Option.Some -> {
@@ -58,7 +70,7 @@ class PrayerTime private constructor(
                 }
                 is Option.None -> { /* no iqamah is always valid */ }
             }
-            return Result.Ok(PrayerTime(prayer, beginsAt, iqamahAt))
+            return Result.Ok(PrayerTime(prayer, beginsAt, iqamahAt, customName))
         }
     }
 }

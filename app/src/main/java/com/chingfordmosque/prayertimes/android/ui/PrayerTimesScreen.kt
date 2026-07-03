@@ -3,6 +3,7 @@ package com.chingfordmosque.prayertimes.android.ui
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,8 +24,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.foundation.clickable
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
@@ -40,6 +46,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -47,6 +55,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
@@ -147,6 +156,8 @@ fun PrayerTimesScreen(
             if (today == null) {
                 EmptyState(isRefreshing = state.isRefreshing)
             } else {
+                JummahCard(jummah = state.jummah)
+
                 Text(
                     text = "Today's prayers",
                     style = MaterialTheme.typography.titleMedium,
@@ -160,8 +171,6 @@ fun PrayerTimesScreen(
                     )
                 }
             }
-
-            JummahCard(jummah = state.jummah)
 
             Spacer(modifier = Modifier.height(8.dp))
         }
@@ -549,31 +558,184 @@ private fun TimeColumn(label: String, value: String) {
 private fun JummahCard(jummah: JummahSectionViewState) {
     if (jummah !is JummahSectionViewState.Visible) return
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        ),
-    ) {
-        Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(
-                text = "Jummah (Friday)",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
+    val activeColor = Color(0xFF6366F1)
+    val activeContainerColor = Color(0x226366F1)
+
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.2f),
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            ),
+        ) {
+            Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Text(
+                    text = "Jummah Congregations",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    jummah.times.forEachIndexed { index, time ->
+                        val isHighlighted = index == jummah.activeIndex
+                        val label = when (index) {
+                            0 -> "1st"
+                            1 -> "2nd"
+                            2 -> "3rd"
+                            else -> "${index + 1}th"
+                        }
+                        Card(
+                            modifier = Modifier.weight(1f).height(95.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (isHighlighted) {
+                                    activeContainerColor
+                                } else {
+                                    MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f)
+                                }
+                            ),
+                            border = if (isHighlighted) {
+                                BorderStroke(2.dp, activeColor)
+                            } else {
+                                BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                            }
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(8.dp),
+                                verticalArrangement = Arrangement.SpaceBetween,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "$label Jamā'ah",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Medium,
+                                    color = if (isHighlighted) activeColor else MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.6f)
+                                )
+                                Text(
+                                    text = time,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isHighlighted) activeColor else MaterialTheme.colorScheme.onSecondaryContainer
+                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(3.dp)
+                                ) {
+                                    if (isHighlighted) {
+                                        Icon(
+                                            imageVector = Icons.Default.Check,
+                                            contentDescription = null,
+                                            tint = activeColor,
+                                            modifier = Modifier.size(10.dp)
+                                        )
+                                        Text(
+                                            text = "Active",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = activeColor
+                                        )
+                                    } else {
+                                        val activeIdx = jummah.activeIndex
+                                        val statusText = if (activeIdx != null && index < activeIdx) "Done" else "Upcoming"
+                                        Text(
+                                            text = statusText,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.4f)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Friday Sunnahs & Preparation Guide
+        var isGuideExpanded by remember { mutableStateOf(false) }
+        val sunnahs = remember {
+            listOf(
+                "🚿 Ghusl (Ritual Bath) before Jummah prayer" to "It is highly recommended to perform Ghusl on Friday to cleanse oneself.",
+                "🧴 Clean Clothes & Perfume" to "Wear clean or your best clothes, and apply attar/perfume.",
+                "📖 Recite Surah Al-Kahf" to "Reciting Surah Al-Kahf on Friday illuminates light for the reader until the next Friday.",
+                "📿 Increase Salawat upon the Prophet ﷺ" to "Send abundant blessings upon the Prophet Muhammad ﷺ.",
+                "🕌 Arrive Early to the Masjid" to "Walk calmly to the mosque early to listen attentively to the Khutbah.",
+                "🤲 Seek the hour of answered Dua" to "Make earnest supplication in the last hour before Maghrib."
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                jummah.times.forEach { time ->
-                    AssistChip(
-                        onClick = {},
-                        enabled = false,
-                        label = { Text(time) },
-                        colors = AssistChipDefaults.assistChipColors(
-                            disabledLabelColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            disabledContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.18f),
-                        ),
+        }
+        val checkboxStates = remember { List(sunnahs.size) { mutableStateOf(false) } }
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            ),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { isGuideExpanded = !isGuideExpanded }
+                    .padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "✨ Friday Sunnahs & Prep Guide",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
                     )
+                    Icon(
+                        imageVector = if (isGuideExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                        contentDescription = if (isGuideExpanded) "Collapse" else "Expand"
+                    )
+                }
+
+                if (isGuideExpanded) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    sunnahs.forEachIndexed { index, (title, description) ->
+                        var checked by checkboxStates[index]
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { checked = !checked }
+                                .padding(vertical = 4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            Checkbox(
+                                checked = checked,
+                                onCheckedChange = { checked = it },
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Column {
+                                Text(
+                                    text = title,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    textDecoration = if (checked) androidx.compose.ui.text.style.TextDecoration.LineThrough else null,
+                                    color = if (checked) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    text = description,
+                                    style = Modifier.align(Alignment.Start).let { MaterialTheme.typography.bodySmall },
+                                    color = if (checked) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

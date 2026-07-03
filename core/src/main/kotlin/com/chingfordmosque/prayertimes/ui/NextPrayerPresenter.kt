@@ -32,7 +32,7 @@ object NextPrayerPresenter {
     fun present(state: RefreshState): NextPrayerViewState =
         build(
             state = state,
-            nextPrayerName = state.nextPrayer.map { it.prayer.name }.getOrNull(),
+            nextPrayerName = state.nextPrayer.map { it.name }.getOrNull(),
             countdown = state.timeUntilNext.map { it.toString() }.getOrNull(),
         )
 
@@ -59,18 +59,18 @@ object NextPrayerPresenter {
         var ringProgress = 0f
         when (val status = ScheduleService.getPrayerStatus(schedule, now)) {
             is PrayerStatus.Active -> {
-                ringPrayerName = status.prayer.name
+                ringPrayerName = status.name
                 ringIsActive = true
-                ringCaption = "${status.prayer.name} ends in"
+                ringCaption = "${status.name} ends in"
                 ringCountdown = now.durationUntil(status.endsAt).toString()
                 val total = status.startsAt.durationUntil(status.endsAt).totalSeconds
                 val elapsed = status.startsAt.durationUntil(now).totalSeconds
                 ringProgress = if (total > 0) (elapsed.toFloat() / total).coerceIn(0f, 1f) else 0f
             }
             is PrayerStatus.Upcoming -> {
-                ringPrayerName = status.prayer.name
+                ringPrayerName = status.name
                 ringIsActive = false
-                ringCaption = "${status.prayer.name} begins in"
+                ringCaption = if (status.customName?.startsWith("Jummah") == true) "${status.name} starts in" else "${status.name} begins in"
                 ringCountdown = now.durationUntil(status.beginsAt).toString()
                 val total = status.windowStartsAt.durationUntil(status.beginsAt).totalSeconds
                 val elapsed = status.windowStartsAt.durationUntil(now).totalSeconds
@@ -81,7 +81,7 @@ object NextPrayerPresenter {
 
         return build(
             state = state,
-            nextPrayerName = next.map { it.prayer.name }.getOrNull(),
+            nextPrayerName = next.map { it.name }.getOrNull(),
             countdown = remaining.map { it.toString() }.getOrNull(),
             ringPrayerName = ringPrayerName,
             ringIsActive = ringIsActive,

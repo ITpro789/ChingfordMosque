@@ -20,6 +20,19 @@ class Date private constructor(val year: Int, val month: Int, val day: Int) : Co
         }
     }
 
+    /** Returns day of week: 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday */
+    fun dayOfWeek(): Int {
+        val t = intArrayOf(0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4)
+        var y = year
+        if (month < 3) {
+            y -= 1
+        }
+        return (y + y / 4 - y / 100 + y / 400 + t[month - 1] + day) % 7
+    }
+
+    /** Returns true if this date is a Friday. */
+    fun isFriday(): Boolean = dayOfWeek() == 5
+
     override fun compareTo(other: Date): Int {
         if (year != other.year) return year.compareTo(other.year)
         if (month != other.month) return month.compareTo(other.month)

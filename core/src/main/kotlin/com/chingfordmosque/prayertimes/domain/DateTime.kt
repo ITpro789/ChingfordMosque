@@ -32,6 +32,20 @@ class DateTime private constructor(
         return Duration.ofSeconds(total)
     }
 
+    fun plusMinutes(minutes: Int): DateTime {
+        var totalMinutes = hour * 60 + this.minute + minutes
+        var totalHours = totalMinutes / 60
+        totalMinutes %= 60
+        var newDate = date
+        var newHour = totalHours % 24
+        var days = totalHours / 24
+        while (days > 0) {
+            newDate = newDate.nextDay()
+            days--
+        }
+        return DateTime.of(newDate, newHour, totalMinutes, second).getOrThrow()
+    }
+
     override fun compareTo(other: DateTime): Int {
         val d = date.compareTo(other.date)
         if (d != 0) return d

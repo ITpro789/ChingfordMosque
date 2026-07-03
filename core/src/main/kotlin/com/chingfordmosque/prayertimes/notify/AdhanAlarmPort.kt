@@ -17,6 +17,9 @@ data class AlertId(val value: String) {
     companion object {
         /** The canonical id for the adhan of [prayer] on [date], e.g. "Fajr@2026-06-30". */
         fun of(prayer: Prayer, date: Date): AlertId = AlertId("${prayer.name}@$date")
+
+        /** A custom id for custom adhan alerts, e.g. "Jummah 1@2026-06-30". */
+        fun ofCustom(label: String, date: Date): AlertId = AlertId("$label@$date")
     }
 }
 
@@ -35,6 +38,7 @@ data class ScheduledAdhanAlert(
     val date: Date,
     val firesAt: DateTime,
     val playAdhanSound: Boolean,
+    val label: String = prayer.name,
 )
 
 /**

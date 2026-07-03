@@ -15,12 +15,19 @@ import com.chingfordmosque.prayertimes.domain.Prayer
  * - Between Sunrise and Zuhr there is no active fard prayer (a gap → [Upcoming] Zuhr).
  */
 sealed class PrayerStatus {
+    abstract val customName: String?
+    val name: String get() = customName ?: when (this) {
+        is Active -> prayer.name
+        is Upcoming -> prayer.name
+        is None -> ""
+    }
 
     /** A prayer is currently active: its window is [startsAt, endsAt). */
     data class Active(
         val prayer: Prayer,
         val startsAt: DateTime,
         val endsAt: DateTime,
+        override val customName: String? = null,
     ) : PrayerStatus()
 
     /**
@@ -31,8 +38,11 @@ sealed class PrayerStatus {
         val prayer: Prayer,
         val windowStartsAt: DateTime,
         val beginsAt: DateTime,
+        override val customName: String? = null,
     ) : PrayerStatus()
 
     /** Not enough schedule data to determine a status. */
-    data object None : PrayerStatus()
+    data object None : PrayerStatus() {
+        override val customName: String? = null
+    }
 }

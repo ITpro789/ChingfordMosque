@@ -96,7 +96,7 @@ class PrayerViewModel(application: Application) : AndroidViewModel(application) 
     private fun snapshot(isRefreshing: Boolean): PrayerUiState =
         PrayerUiState(
             today = container.todayScheduleViewState(),
-            jummah = container.jummahSectionViewState(),
+            jummah = container.jummahSectionViewState(container.clock.now()),
             next = container.nextPrayerViewState(container.clock.now()),
             isRefreshing = isRefreshing,
         )

@@ -101,14 +101,38 @@ object ScheduleService {
         schedule: DaySchedule,
         now: DateTime,
     ): Option<Pair<PrayerTime, DateTime>> {
-        val candidate = schedule.prayers
+        val date = schedule.scheduleDate
+        val prayersToUse = if (date.isFriday() && schedule.jummah is Option.Some) {
+            val jummah = (schedule.jummah as Option.Some).value
+            val list = mutableListOf<PrayerTime>()
+            schedule.prayer(Prayer.Fajr).getOrNull()?.let { list.add(it) }
+            jummah.jamaahTimes.forEachIndexed { index, time ->
+                val label = if (jummah.jamaahTimes.size == 1) "Jummah" else "Jummah ${index + 1}"
+                val pt = PrayerTime.of(Prayer.Zuhr, time, customName = label).getOrThrow()
+                list.add(pt)
+            }
+            listOf(Prayer.Asr, Prayer.Maghrib, Prayer.Isha).forEach { p ->
+                schedule.prayer(p).getOrNull()?.let { list.add(it) }
+            }
+            list
+        } else {
+            schedule.prayers.filter { it.prayer.isAlerting }
+        }
+
+        val candidate = prayersToUse
             .asSequence()
-            .filter { it.prayer.isAlerting }
-            .map { it to DateTime.of(schedule.scheduleDate, it.beginsAt) }
+            .map { it to DateTime.of(date, it.beginsAt) }
             .filter { (_, instant) -> instant > now }
             .minByOrNull { (_, instant) -> instant }
         return Option.ofNullable(candidate)
     }
+
+    private data class StatusWindow(
+        val prayer: Prayer,
+        val start: DateTime,
+        val end: DateTime,
+        val customName: String? = null,
+    )
 
     /**
      * The "current prayer period" status relative to [now] — the data driving the circular
@@ -118,7 +142,7 @@ object ScheduleService {
      * instants, encoding these period rules exactly:
      *  1. Carryover Isha:  [scheduleDate 00:00:00, Fajr.begin)
      *  2. Fajr:            [Fajr.begin, Sunrise.begin)
-     *  3. Zuhr:            [Zuhr.begin, Asr.begin)
+     *  3. Zuhr/Jummah:     [Zuhr/Jummah.begin, Asr.begin)
      *  4. Asr:             [Asr.begin, Maghrib.begin)
      *  5. Maghrib:         [Maghrib.begin, Isha.begin)
      *  6. Isha:            [Isha.begin, next-day Fajr.begin)
@@ -144,36 +168,52 @@ object ScheduleService {
         val nextDayFajr = schedule.prayer(Prayer.Fajr).getOrNull()
             ?.let { DateTime.of(date.nextDay(), it.beginsAt) }
 
+        val isFriday = date.isFriday()
+        val jummahOpt = schedule.jummah
+
         // (prayer, start, end) windows, in chronological order; only those fully defined.
         val windows = buildList {
-            if (fajr != null) add(Triple(Prayer.Isha, midnight, fajr))            // carryover
-            if (fajr != null && sunrise != null) add(Triple(Prayer.Fajr, fajr, sunrise))
-            if (zuhr != null && asr != null) add(Triple(Prayer.Zuhr, zuhr, asr))
-            if (asr != null && maghrib != null) add(Triple(Prayer.Asr, asr, maghrib))
-            if (maghrib != null && isha != null) add(Triple(Prayer.Maghrib, maghrib, isha))
-            if (isha != null && nextDayFajr != null) add(Triple(Prayer.Isha, isha, nextDayFajr))
+            if (fajr != null) add(StatusWindow(Prayer.Isha, midnight, fajr))            // carryover
+            if (fajr != null && sunrise != null) add(StatusWindow(Prayer.Fajr, fajr, sunrise))
+            if (isFriday && jummahOpt is Option.Some && asr != null) {
+                val jummah = jummahOpt.value
+                jummah.jamaahTimes.forEachIndexed { index, time ->
+                    val start = DateTime.of(date, time)
+                    val end = start.plusMinutes(30)
+                    val nextStart = if (index + 1 < jummah.jamaahTimes.size) DateTime.of(date, jummah.jamaahTimes[index + 1]) else asr
+                    val cappedEnd = if (end > nextStart) nextStart else end
+                    val label = if (jummah.jamaahTimes.size == 1) "Jummah" else "Jummah ${index + 1}"
+                    add(StatusWindow(Prayer.Zuhr, start, cappedEnd, label))
+                }
+            } else {
+                if (zuhr != null && asr != null) add(StatusWindow(Prayer.Zuhr, zuhr, asr))
+            }
+            if (asr != null && maghrib != null) add(StatusWindow(Prayer.Asr, asr, maghrib))
+            if (maghrib != null && isha != null) add(StatusWindow(Prayer.Maghrib, maghrib, isha))
+            if (isha != null && nextDayFajr != null) add(StatusWindow(Prayer.Isha, isha, nextDayFajr))
         }
 
         // Inside a window [start, end) -> Active.
-        windows.firstOrNull { (_, start, end) -> now >= start && now < end }
-            ?.let { (prayer, start, end) -> return PrayerStatus.Active(prayer, start, end) }
+        windows.firstOrNull { now >= it.start && now < it.end }
+            ?.let { return PrayerStatus.Active(it.prayer, it.start, it.end, it.customName) }
 
         // Earliest window starting strictly after now -> Upcoming.
-        val upcoming = windows.filter { (_, start, _) -> start > now }
-            .minByOrNull { (_, start, _) -> start }
+        val upcoming = windows.filter { it.start > now }
+            .minByOrNull { it.start }
             ?: return PrayerStatus.None
 
         // windowStartsAt = latest preceding window-end that is <= now, else midnight.
         val windowStart = windows
-            .map { (_, _, end) -> end }
+            .map { it.end }
             .filter { it <= now }
             .maxOrNull()
             ?: midnight
 
         return PrayerStatus.Upcoming(
-            prayer = upcoming.first,
+            prayer = upcoming.prayer,
             windowStartsAt = windowStart,
-            beginsAt = upcoming.second,
+            beginsAt = upcoming.start,
+            customName = upcoming.customName,
         )
     }
 }
