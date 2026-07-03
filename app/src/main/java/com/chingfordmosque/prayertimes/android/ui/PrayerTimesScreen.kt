@@ -59,9 +59,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.Canvas
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -164,10 +166,12 @@ fun PrayerTimesScreen(
                     fontWeight = FontWeight.SemiBold,
                 )
                 val activeName = if (state.next.ringIsActive) state.next.ringPrayerName else null
+                val isFriday = state.jummah is JummahSectionViewState.Visible
                 today.rows.forEach { row ->
                     PrayerCard(
                         row = row,
                         isActive = row.prayerName == activeName,
+                        isFriday = isFriday,
                     )
                 }
             }
@@ -465,7 +469,12 @@ private fun ErrorBanner(
 private fun PrayerCard(
     row: PrayerRowViewState,
     isActive: Boolean,
+    isFriday: Boolean = false,
 ) {
+    val isZuhrOnFriday = isFriday && row.prayerName.equals("Zuhr", ignoreCase = true)
+    val displayName = if (isZuhrOnFriday) "Zuhr (Jummah)" else row.prayerName
+    val displayIqamah = if (isZuhrOnFriday) "See Above" else (row.iqamah ?: "\u2014")
+
     val containerColor = when {
         isActive -> MaterialTheme.colorScheme.primaryContainer
         row.isInformational -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
@@ -515,7 +524,7 @@ private fun PrayerCard(
                 }
                 Column {
                     Text(
-                        text = row.prayerName,
+                        text = displayName,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = if (isActive) FontWeight.Bold else FontWeight.Medium,
                     )
@@ -536,7 +545,7 @@ private fun PrayerCard(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 TimeColumn(label = "Begins", value = row.begins)
                 Spacer(modifier = Modifier.width(24.dp))
-                TimeColumn(label = "Iqamah", value = row.iqamah ?: "\u2014")
+                TimeColumn(label = "Iqamah", value = displayIqamah)
             }
         }
     }
@@ -558,28 +567,53 @@ private fun TimeColumn(label: String, value: String) {
 private fun JummahCard(jummah: JummahSectionViewState) {
     if (jummah !is JummahSectionViewState.Visible) return
 
-    val activeColor = Color(0xFF6366F1)
-    val activeContainerColor = Color(0x226366F1)
+    val activeColor = MaterialTheme.colorScheme.primary
+    val activeContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.2f),
+                containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.25f),
                 contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
             ),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
         ) {
-            Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(
-                    text = "Jummah Congregations",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                )
+            Column(
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 14.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Jummah Congregations",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    if (jummah.activeIndex != null) {
+                        Box(
+                            modifier = Modifier
+                                .background(activeColor, RoundedCornerShape(6.dp))
+                                .padding(horizontal = 8.dp, vertical = 3.dp)
+                        ) {
+                            Text(
+                                text = "ACTIVE",
+                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                                fontWeight = FontWeight.ExtraBold,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     jummah.times.forEachIndexed { index, time ->
                         val isHighlighted = index == jummah.activeIndex
@@ -590,8 +624,10 @@ private fun JummahCard(jummah: JummahSectionViewState) {
                             else -> "${index + 1}th"
                         }
                         Card(
-                            modifier = Modifier.weight(1f).height(95.dp),
-                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(86.dp),
+                            shape = RoundedCornerShape(14.dp),
                             colors = CardDefaults.cardColors(
                                 containerColor = if (isHighlighted) {
                                     activeContainerColor
@@ -600,45 +636,49 @@ private fun JummahCard(jummah: JummahSectionViewState) {
                                 }
                             ),
                             border = if (isHighlighted) {
-                                BorderStroke(2.dp, activeColor)
+                                BorderStroke(1.5.dp, activeColor)
                             } else {
-                                BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                                BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
                             }
                         ) {
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(8.dp),
+                                    .padding(horizontal = 4.dp, vertical = 8.dp),
                                 verticalArrangement = Arrangement.SpaceBetween,
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
                                     text = "$label Jamā'ah",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Medium,
-                                    color = if (isHighlighted) activeColor else MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.6f)
+                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
+                                    fontWeight = FontWeight.SemiBold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = if (isHighlighted) activeColor else MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.65f)
                                 )
                                 Text(
                                     text = time,
-                                    style = MaterialTheme.typography.titleMedium,
+                                    style = MaterialTheme.typography.titleMedium.copy(fontSize = 17.sp),
                                     fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
                                     color = if (isHighlighted) activeColor else MaterialTheme.colorScheme.onSecondaryContainer
                                 )
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(3.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(2.dp)
                                 ) {
                                     if (isHighlighted) {
                                         Icon(
                                             imageVector = Icons.Default.Check,
                                             contentDescription = null,
                                             tint = activeColor,
-                                            modifier = Modifier.size(10.dp)
+                                            modifier = Modifier.size(11.dp)
                                         )
                                         Text(
                                             text = "Active",
-                                            style = MaterialTheme.typography.labelSmall,
+                                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                                             fontWeight = FontWeight.Bold,
+                                            maxLines = 1,
                                             color = activeColor
                                         )
                                     } else {
@@ -646,8 +686,9 @@ private fun JummahCard(jummah: JummahSectionViewState) {
                                         val statusText = if (activeIdx != null && index < activeIdx) "Done" else "Upcoming"
                                         Text(
                                             text = statusText,
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.4f)
+                                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                                            maxLines = 1,
+                                            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.45f)
                                         )
                                     }
                                 }

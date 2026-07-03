@@ -51,8 +51,8 @@ android {
         applicationId = "com.chingfordmosque.prayertimes"
         minSdk = 26
         targetSdk = 34
-        versionCode = (System.getenv("CM_VERSION_CODE")?.toInt() ?: 1)
-        versionName = (System.getenv("CM_VERSION_NAME") ?: "1.0.0")
+        versionCode = (System.getenv("CM_VERSION_CODE")?.toInt() ?: 9)
+        versionName = (System.getenv("CM_VERSION_NAME") ?: "1.1.0")
     }
 
     buildFeatures {
@@ -99,6 +99,19 @@ android {
         }
 
         debug {
+        }
+    }
+
+    applicationVariants.all {
+        val variant = this
+        val verName = defaultConfig.versionName ?: "1.1.0"
+        outputs.all {
+            val outputImpl = this as? com.android.build.gradle.internal.api.BaseVariantOutputImpl
+            if (variant.name == "release") {
+                outputImpl?.outputFileName = "ChingfordMosqueV${verName}.apk"
+            } else {
+                outputImpl?.outputFileName = "ChingfordMosqueV${verName}-${variant.name}.apk"
+            }
         }
     }
 }
