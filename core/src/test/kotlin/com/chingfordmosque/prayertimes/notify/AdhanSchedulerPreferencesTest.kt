@@ -206,4 +206,41 @@ class AdhanSchedulerPreferencesTest : StringSpec({
         scheduler.cancelAll()
         port.pending() shouldBe emptyList()
     }
+
+    "adhans are scheduled 15 minutes before iqamah except maghrib" {
+        val port = InMemoryAdhanAlarmPort()
+        val scheduler = AdhanNotificationScheduler(port)
+        
+        // Custom schedule with Iqamah times
+        val customSchedule = DaySchedule.of(
+            scheduleDate = date,
+            prayers = listOf(
+                PrayerTime.of(Prayer.Fajr, Time.of(5, 0).getOrThrow(), com.chingfordmosque.prayertimes.domain.Option.Some(Time.of(5, 30).getOrThrow())).getOrThrow(),
+                PrayerTime.of(Prayer.Zuhr, Time.of(12, 0).getOrThrow(), com.chingfordmosque.prayertimes.domain.Option.Some(Time.of(13, 30).getOrThrow())).getOrThrow(),
+                PrayerTime.of(Prayer.Asr, Time.of(15, 0).getOrThrow(), com.chingfordmosque.prayertimes.domain.Option.Some(Time.of(15, 10).getOrThrow())).getOrThrow(), // Gap < 15m, clamps to begins
+                PrayerTime.of(Prayer.Maghrib, Time.of(18, 0).getOrThrow(), com.chingfordmosque.prayertimes.domain.Option.Some(Time.of(18, 15).getOrThrow())).getOrThrow(), // Maghrib exceptions
+                PrayerTime.of(Prayer.Isha, Time.of(20, 0).getOrThrow(), com.chingfordmosque.prayertimes.domain.Option.Some(Time.of(20, 45).getOrThrow())).getOrThrow()
+            )
+        ).getOrThrow()
+
+        val now = DateTime.of(date, 3, 0, 0).getOrThrow()
+        scheduler.reschedule(customSchedule, now)
+
+        val pending = port.pending()
+        
+        // Fajr: 5:30 Iqamah - 15 mins = 5:15
+        pending.first { it.prayer == Prayer.Fajr }.firesAt.time.toString() shouldBe "05:15"
+        
+        // Zuhr: 13:30 Iqamah - 15 mins = 13:15
+        pending.first { it.prayer == Prayer.Zuhr }.firesAt.time.toString() shouldBe "13:15"
+        
+        // Asr: 15:10 Iqamah - 15 mins = 14:55 (clamped to begins 15:00)
+        pending.first { it.prayer == Prayer.Asr }.firesAt.time.toString() shouldBe "15:00"
+        
+        // Maghrib: 18:15 Iqamah, but Maghrib starts at begins (18:00)
+        pending.first { it.prayer == Prayer.Maghrib }.firesAt.time.toString() shouldBe "18:00"
+        
+        // Isha: 20:45 Iqamah - 15 mins = 20:30
+        pending.first { it.prayer == Prayer.Isha }.firesAt.time.toString() shouldBe "20:30"
+    }
 })

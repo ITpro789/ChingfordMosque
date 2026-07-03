@@ -38,7 +38,8 @@ class AdhanNotificationScheduler(
                 .filter { it.prayer.isAlerting && it.prayer != com.chingfordmosque.prayertimes.domain.Prayer.Zuhr }
                 .filter { preferences.isEnabled(it.prayer) }
                 .forEach { prayerTime ->
-                    val firesAt = DateTime.of(schedule.scheduleDate, prayerTime.beginsAt)
+                    val adhanTime = calculateAzaanTime(prayerTime)
+                    val firesAt = DateTime.of(schedule.scheduleDate, adhanTime)
                     if (firesAt > now) {
                         port.schedule(
                             ScheduledAdhanAlert(
@@ -77,7 +78,8 @@ class AdhanNotificationScheduler(
                 .filter { it.prayer.isAlerting }
                 .filter { preferences.isEnabled(it.prayer) }
                 .forEach { prayerTime ->
-                    val firesAt = DateTime.of(schedule.scheduleDate, prayerTime.beginsAt)
+                    val adhanTime = calculateAzaanTime(prayerTime)
+                    val firesAt = DateTime.of(schedule.scheduleDate, adhanTime)
                     if (firesAt > now) {
                         port.schedule(
                             ScheduledAdhanAlert(
@@ -90,6 +92,20 @@ class AdhanNotificationScheduler(
                         )
                     }
                 }
+        }
+    }
+
+    private fun calculateAzaanTime(prayerTime: com.chingfordmosque.prayertimes.domain.PrayerTime): com.chingfordmosque.prayertimes.domain.Time {
+        val begins = prayerTime.beginsAt
+        if (prayerTime.prayer == com.chingfordmosque.prayertimes.domain.Prayer.Maghrib) {
+            return begins
+        }
+        return when (val iqamahOpt = prayerTime.iqamahAt) {
+            is com.chingfordmosque.prayertimes.domain.Option.Some -> {
+                val calculated = iqamahOpt.value.minusMinutes(15)
+                if (calculated < begins) begins else calculated
+            }
+            is com.chingfordmosque.prayertimes.domain.Option.None -> begins
         }
     }
 

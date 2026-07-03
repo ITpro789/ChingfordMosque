@@ -25,6 +25,12 @@ class Time private constructor(val minutesSinceMidnight: Int) : Comparable<Time>
     override fun toString(): String =
         hour.toString().padStart(2, '0') + ":" + minute.toString().padStart(2, '0')
 
+    /** Return a new Time subtracted by the given minutes, clamped to the day's boundaries. */
+    fun minusMinutes(minutes: Int): Time {
+        val newMin = (minutesSinceMidnight - minutes).coerceIn(0, MINUTES_PER_DAY - 1)
+        return Time(newMin)
+    }
+
     companion object {
         const val MINUTES_PER_HOUR = 60
         const val MINUTES_PER_DAY = 24 * MINUTES_PER_HOUR
