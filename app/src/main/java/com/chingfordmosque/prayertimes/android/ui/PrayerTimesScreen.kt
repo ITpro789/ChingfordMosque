@@ -190,44 +190,14 @@ private fun CountdownHero(
             Color.Transparent,
         ),
     )
-    Surface(
-        shape = RoundedCornerShape(24.dp),
-        modifier = Modifier.fillMaxWidth(),
-        color = Color.Transparent,
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(gradient, RoundedCornerShape(24.dp))
+            .padding(horizontal = 16.dp, vertical = 16.dp),
+        contentAlignment = Alignment.Center,
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(gradient)
-                .padding(horizontal = 20.dp, vertical = 20.dp),
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(
-                    text = today?.date ?: "Chingford Mosque",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontWeight = FontWeight.Medium,
-                )
-
-                val hijri = remember { HijriDate.today() }
-                if (hijri != null) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = hijri,
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                        fontWeight = FontWeight.Medium,
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                CircularCountdownRing(next = next)
-            }
-        }
+        CircularCountdownRing(next = next)
     }
 }
 
@@ -254,13 +224,13 @@ private fun CircularCountdownRing(next: NextPrayerViewState) {
 
     Box(
         modifier = Modifier
-            .widthIn(max = 280.dp)
+            .widthIn(max = 170.dp)
             .fillMaxWidth()
             .aspectRatio(1f),
         contentAlignment = Alignment.Center,
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val strokeWidth = 16.dp.toPx()
+            val strokeWidth = 10.dp.toPx()
             val inset = strokeWidth / 2f
             val arcSize = Size(size.width - strokeWidth, size.height - strokeWidth)
             val topLeft = Offset(inset, inset)
@@ -307,28 +277,30 @@ private fun RingCenter(next: NextPrayerViewState) {
         if (name != null && countdown != null) {
             if (next.ringIsActive) {
                 NowBadge()
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(2.dp))
             }
             Text(
                 text = name,
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.titleMedium.copy(fontSize = 16.sp),
                 color = ringTextColor,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.ExtraBold,
+                maxLines = 1,
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            next.ringCaption?.let { caption ->
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = caption,
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                    color = ringTextColor.copy(alpha = 0.6f),
+                    letterSpacing = 1.sp,
+                )
+            }
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = countdown,
                 style = CountdownTextStyle,
                 color = countdownColor,
             )
-            next.ringCaption?.let { caption ->
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = caption,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = ringTextColor.copy(alpha = 0.7f),
-                )
-            }
         } else {
             Icon(
                 imageVector = Icons.Outlined.Schedule,
