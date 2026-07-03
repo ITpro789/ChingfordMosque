@@ -108,30 +108,6 @@ fun PrayerTimesScreen(
     )
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            TopAppBar(
-                title = { Text("Chingford Mosque", fontWeight = FontWeight.SemiBold) },
-                actions = {
-                    if (state.isRefreshing) {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .padding(end = 16.dp)
-                                .size(22.dp),
-                            strokeWidth = 2.5.dp,
-                        )
-                    } else {
-                        IconButton(onClick = onRefresh) {
-                            Icon(Icons.Filled.Refresh, contentDescription = "Refresh times")
-                        }
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    actionIconContentColor = MaterialTheme.colorScheme.primary,
-                ),
-            )
-        },
     ) { padding ->
         Column(
             modifier = Modifier
@@ -142,7 +118,12 @@ fun PrayerTimesScreen(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            CountdownHero(today = state.today, next = state.next)
+            CountdownHero(
+                today = state.today,
+                next = state.next,
+                isRefreshing = state.isRefreshing,
+                onRefresh = onRefresh,
+            )
 
             FreshnessStrip(next = state.next)
 
@@ -183,6 +164,8 @@ fun PrayerTimesScreen(
 private fun CountdownHero(
     today: DayScheduleViewState?,
     next: NextPrayerViewState,
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit,
 ) {
     val gradient = Brush.verticalGradient(
         colors = listOf(
@@ -197,7 +180,60 @@ private fun CountdownHero(
             .padding(horizontal = 16.dp, vertical = 16.dp),
         contentAlignment = Alignment.Center,
     ) {
-        CircularCountdownRing(next = next)
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "Chingford Mosque",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+                if (isRefreshing) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .padding(end = 12.dp)
+                            .size(20.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                } else {
+                    IconButton(
+                        onClick = onRefresh,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Refresh,
+                            contentDescription = "Refresh times",
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
+            }
+            
+            val dateText = today?.date
+            val hijri = remember { HijriDate.today() }
+            if (dateText != null || hijri != null) {
+                val combinedText = buildString {
+                    if (dateText != null) append(dateText)
+                    if (dateText != null && hijri != null) append(" • ")
+                    if (hijri != null) append(hijri)
+                }
+                Text(
+                    text = combinedText,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+            } else {
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+            
+            CircularCountdownRing(next = next)
+        }
     }
 }
 
@@ -454,8 +490,8 @@ private fun PrayerTimetable(
     ) {
         Column(modifier = Modifier.padding(10.dp)) {
             rows.forEachIndexed { index, row ->
-                val isActive = row.prayerName == activeName
                 val isZuhrOnFriday = isFriday && row.prayerName.equals("Zuhr", ignoreCase = true)
+                val isActive = row.prayerName == activeName || (isZuhrOnFriday && activeName?.startsWith("Jummah") == true)
                 val displayName = if (isZuhrOnFriday) "Zuhr (Jummah)" else row.prayerName
                 val displayIqamah = if (isZuhrOnFriday) "See Above" else (row.iqamah ?: "\u2014")
 
