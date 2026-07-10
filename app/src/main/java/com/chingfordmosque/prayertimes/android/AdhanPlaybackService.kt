@@ -2,8 +2,10 @@ package com.chingfordmosque.prayertimes.android
 
 import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
@@ -13,7 +15,6 @@ import com.chingfordmosque.prayertimes.android.platform.AlarmManagerAdhanPort
 import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.Response
 
 class AdhanPlaybackService : Service() {
 
@@ -21,8 +22,23 @@ class AdhanPlaybackService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
     private var mediaPlayer: MediaPlayer? = null
     private val okHttpClient = OkHttpClient()
+    private var durationLimitJob: Job? = null
+    private var durationSeconds: Int = 0
+
+    private val volumeReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == "android.media.VOLUME_CHANGED_ACTION") {
+                stopPlaybackAndService()
+            }
+        }
+    }
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    override fun onCreate() {
+        super.onCreate()
+        registerReceiver(volumeReceiver, IntentFilter("android.media.VOLUME_CHANGED_ACTION"))
+    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_STOP_PLAYBACK) {
@@ -31,6 +47,7 @@ class AdhanPlaybackService : Service() {
         }
 
         val prayerName = intent?.getStringExtra(AlarmManagerAdhanPort.EXTRA_PRAYER_NAME) ?: "Prayer"
+        durationSeconds = intent?.getIntExtra(AlarmManagerAdhanPort.EXTRA_DURATION_SECONDS, 0) ?: 0
         
         // Start foreground immediately to prevent being killed
         startForegroundServiceNotification(prayerName, "Checking live stream...")
@@ -136,6 +153,13 @@ class AdhanPlaybackService : Service() {
                 prepareAsync()
                 setOnPreparedListener {
                     start()
+                    if (durationSeconds > 0) {
+                        durationLimitJob?.cancel()
+                        durationLimitJob = serviceScope.launch(Dispatchers.Main) {
+                            delay(durationSeconds * 1000L)
+                            stopPlaybackAndService()
+                        }
+                    }
                 }
             }
         } catch (e: Exception) {
@@ -152,12 +176,14 @@ class AdhanPlaybackService : Service() {
         } finally {
             mediaPlayer = null
         }
+        durationLimitJob?.cancel()
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        unregisterReceiver(volumeReceiver)
         serviceJob.cancel()
         stopPlaybackAndService()
     }
@@ -166,9 +192,10 @@ class AdhanPlaybackService : Service() {
         const val ACTION_STOP_PLAYBACK = "com.chingfordmosque.prayertimes.action.STOP_PLAYBACK"
         private const val NOTIFICATION_ID = 1001
         
-        fun start(context: Context, prayerName: String) {
+        fun start(context: Context, prayerName: String, durationSeconds: Int = 0) {
             val intent = Intent(context, AdhanPlaybackService::class.java).apply {
                 putExtra(AlarmManagerAdhanPort.EXTRA_PRAYER_NAME, prayerName)
+                putExtra(AlarmManagerAdhanPort.EXTRA_DURATION_SECONDS, durationSeconds)
             }
             androidx.core.content.ContextCompat.startForegroundService(context, intent)
         }

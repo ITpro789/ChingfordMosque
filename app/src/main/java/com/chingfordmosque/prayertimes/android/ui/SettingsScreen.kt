@@ -46,6 +46,9 @@ fun SettingsRoute(viewModel: SettingsViewModel = viewModel()) {
         onPrayerToggle = viewModel::setPrayerEnabled,
         onAdhanSoundToggle = viewModel::setAdhanSoundEnabled,
         onThemeSelected = viewModel::setThemeMode,
+        onLocalAdhanToggle = viewModel::setLocalAdhan,
+        onIqamahOffsetChange = viewModel::setIqamahOffset,
+        onDurationChange = viewModel::setDurationSeconds,
     )
 }
 
@@ -59,6 +62,9 @@ fun SettingsScreen(
     onPrayerToggle: (Prayer, Boolean) -> Unit,
     onAdhanSoundToggle: (Boolean) -> Unit,
     onThemeSelected: (ThemeMode) -> Unit,
+    onLocalAdhanToggle: (Boolean) -> Unit = {},
+    onIqamahOffsetChange: (Int) -> Unit = {},
+    onDurationChange: (Int) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -72,6 +78,33 @@ fun SettingsScreen(
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.SemiBold,
         )
+
+        SectionCard(title = "Azaan timing") {
+            SwitchRow(
+                label = "Use Local Begins Time",
+                supporting = "If disabled, Azaan plays before Mosque Iqamah time",
+                checked = settings.isLocalAdhan,
+                onCheckedChange = onLocalAdhanToggle,
+            )
+            
+            if (!settings.isLocalAdhan) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
+                NumberRow(
+                    label = "Minutes before Iqamah",
+                    supporting = "How early the Azaan should sound",
+                    value = settings.iqamahOffset,
+                    onValueChange = onIqamahOffsetChange,
+                )
+            }
+            
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
+            NumberRow(
+                label = "Duration Limit (seconds)",
+                supporting = "Stop Azaan early (e.g. 180 to skip Dua)",
+                value = settings.durationSeconds,
+                onValueChange = onDurationChange,
+            )
+        }
 
         SectionCard(title = "Prayer notifications") {
             SettingsRepository.ALERTING_PRAYERS.forEachIndexed { index, prayer ->
@@ -191,6 +224,47 @@ private fun RadioRow(
         RadioButton(selected = selected, onClick = null)
         Spacer(modifier = Modifier.width(12.dp))
         Text(text = label, style = MaterialTheme.typography.titleMedium)
+    }
+}
+
+@Composable
+private fun NumberRow(
+    label: String,
+    supporting: String?,
+    value: Int,
+    onValueChange: (Int) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 18.dp, vertical = 14.dp)
+    ) {
+        Text(text = label, style = MaterialTheme.typography.titleMedium)
+        if (supporting != null) {
+            Text(
+                text = supporting,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            androidx.compose.material3.Slider(
+                value = value.toFloat(),
+                onValueChange = { onValueChange(it.toInt()) },
+                valueRange = 0f..300f,
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = value.toString(),
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
 

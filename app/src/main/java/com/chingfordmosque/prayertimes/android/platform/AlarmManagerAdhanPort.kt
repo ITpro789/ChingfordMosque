@@ -101,6 +101,7 @@ class AlarmManagerAdhanPort(
             if (alert != null) {
                 putExtra(EXTRA_PRAYER_NAME, alert.label)
                 putExtra(EXTRA_PLAY_SOUND, alert.playAdhanSound)
+                putExtra(EXTRA_DURATION_SECONDS, alert.durationSeconds)
             }
         }
 
@@ -151,5 +152,6 @@ class AlarmManagerAdhanPort(
         const val EXTRA_ALERT_ID = "com.chingfordmosque.prayertimes.extra.ALERT_ID"
         const val EXTRA_PRAYER_NAME = "com.chingfordmosque.prayertimes.extra.PRAYER_NAME"
         const val EXTRA_PLAY_SOUND = "com.chingfordmosque.prayertimes.extra.PLAY_SOUND"
+        const val EXTRA_DURATION_SECONDS = "com.chingfordmosque.prayertimes.extra.DURATION_SECONDS"
     }
 }

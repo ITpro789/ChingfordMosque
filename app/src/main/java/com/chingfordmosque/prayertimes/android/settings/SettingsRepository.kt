@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.chingfordmosque.prayertimes.domain.NotificationPreferences
@@ -25,10 +26,19 @@ data class AppSettings(
     val enabledPrayers: Set<Prayer>,
     val adhanSoundEnabled: Boolean,
     val themeMode: ThemeMode,
+    val isLocalAdhan: Boolean = false,
+    val iqamahOffset: Int = 15,
+    val durationSeconds: Int = 180,
 ) {
     /** Project these settings into the core [NotificationPreferences] value. */
     fun toNotificationPreferences(): NotificationPreferences =
-        NotificationPreferences.of(enabledPrayers, adhanSoundEnabled)
+        NotificationPreferences.of(
+            enabledPrayers, 
+            adhanSoundEnabled,
+            isLocalAdhan,
+            iqamahOffset,
+            durationSeconds
+        )
 
     companion object {
         /** Defaults: all five alerting prayers on, adhan sound on, follow the system theme. */
@@ -36,6 +46,9 @@ data class AppSettings(
             enabledPrayers = SettingsRepository.ALERTING_PRAYERS.toSet(),
             adhanSoundEnabled = true,
             themeMode = ThemeMode.SYSTEM,
+            isLocalAdhan = false,
+            iqamahOffset = 15,
+            durationSeconds = 180,
         )
     }
 }
@@ -44,7 +57,7 @@ private val Context.settingsDataStore: DataStore<Preferences> by preferencesData
 
 /**
  * Preferences-DataStore backed store for the app's user settings: per-prayer notification
- * toggles (Fajr, Zuhr, Asr, Maghrib, Isha — Sunrise never alerts so it is not persisted),
+ * toggles (Fajr, Zuhr, Asr, Maghrib, Isha ?" Sunrise never alerts so it is not persisted),
  * the adhan-sound switch, and the theme mode. Exposes reactive [Flow]s plus suspend setters,
  * and a synchronous [readBlocking] used once at process startup.
  */
@@ -71,6 +84,18 @@ class SettingsRepository(context: Context) {
         dataStore.edit { it[THEME_MODE] = mode.name }
     }
 
+    suspend fun setLocalAdhan(isLocal: Boolean) {
+        dataStore.edit { it[LOCAL_ADHAN] = isLocal }
+    }
+
+    suspend fun setIqamahOffset(offset: Int) {
+        dataStore.edit { it[IQAMAH_OFFSET] = offset }
+    }
+
+    suspend fun setDurationSeconds(seconds: Int) {
+        dataStore.edit { it[DURATION_SECONDS] = seconds }
+    }
+
     /** Read the current snapshot synchronously (used once from Application.onCreate). */
     fun readBlocking(): AppSettings = runBlocking { settings.first() }
 
@@ -83,6 +108,9 @@ class SettingsRepository(context: Context) {
             enabledPrayers = enabled,
             adhanSoundEnabled = this[ADHAN_SOUND] ?: true,
             themeMode = readThemeMode(),
+            isLocalAdhan = this[LOCAL_ADHAN] ?: false,
+            iqamahOffset = this[IQAMAH_OFFSET] ?: 15,
+            durationSeconds = this[DURATION_SECONDS] ?: 180,
         )
     }
 
@@ -106,5 +134,8 @@ class SettingsRepository(context: Context) {
 
         private val ADHAN_SOUND = booleanPreferencesKey("adhan_sound_enabled")
         private val THEME_MODE = stringPreferencesKey("theme_mode")
+        private val LOCAL_ADHAN = booleanPreferencesKey("local_adhan")
+        private val IQAMAH_OFFSET = intPreferencesKey("iqamah_offset")
+        private val DURATION_SECONDS = intPreferencesKey("duration_seconds")
     }
 }

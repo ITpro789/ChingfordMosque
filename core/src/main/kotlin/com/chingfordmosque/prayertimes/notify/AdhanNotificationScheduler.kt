@@ -48,6 +48,7 @@ class AdhanNotificationScheduler(
                                 date = schedule.scheduleDate,
                                 firesAt = firesAt,
                                 playAdhanSound = playSound,
+                                durationSeconds = preferences.durationSeconds,
                             )
                         )
                     }
@@ -66,6 +67,7 @@ class AdhanNotificationScheduler(
                                 date = schedule.scheduleDate,
                                 firesAt = firesAt,
                                 playAdhanSound = playSound,
+                                durationSeconds = preferences.durationSeconds,
                                 label = label,
                             )
                         )
@@ -88,6 +90,7 @@ class AdhanNotificationScheduler(
                                 date = schedule.scheduleDate,
                                 firesAt = firesAt,
                                 playAdhanSound = playSound,
+                                durationSeconds = preferences.durationSeconds,
                             )
                         )
                     }
@@ -97,12 +100,15 @@ class AdhanNotificationScheduler(
 
     private fun calculateAzaanTime(prayerTime: com.chingfordmosque.prayertimes.domain.PrayerTime): com.chingfordmosque.prayertimes.domain.Time {
         val begins = prayerTime.beginsAt
+        if (preferences.isLocalAdhan) {
+            return begins
+        }
         if (prayerTime.prayer == com.chingfordmosque.prayertimes.domain.Prayer.Maghrib) {
             return begins
         }
         return when (val iqamahOpt = prayerTime.iqamahAt) {
             is com.chingfordmosque.prayertimes.domain.Option.Some -> {
-                val calculated = iqamahOpt.value.minusMinutes(15)
+                val calculated = iqamahOpt.value.minusMinutes(preferences.iqamahOffset)
                 if (calculated < begins) begins else calculated
             }
             is com.chingfordmosque.prayertimes.domain.Option.None -> begins

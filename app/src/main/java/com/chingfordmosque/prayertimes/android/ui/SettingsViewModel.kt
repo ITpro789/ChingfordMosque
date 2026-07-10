@@ -54,6 +54,27 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch { repository.setThemeMode(mode) }
     }
 
+    fun setLocalAdhan(isLocal: Boolean) {
+        viewModelScope.launch {
+            repository.setLocalAdhan(isLocal)
+            applyNotificationSettings()
+        }
+    }
+
+    fun setIqamahOffset(offset: Int) {
+        viewModelScope.launch {
+            repository.setIqamahOffset(offset)
+            applyNotificationSettings()
+        }
+    }
+
+    fun setDurationSeconds(seconds: Int) {
+        viewModelScope.launch {
+            repository.setDurationSeconds(seconds)
+            applyNotificationSettings()
+        }
+    }
+
     /**
      * Push the latest persisted preferences into the scheduler and re-arm alarms from the
      * cached schedule, if one is loaded. No network fetch is performed.

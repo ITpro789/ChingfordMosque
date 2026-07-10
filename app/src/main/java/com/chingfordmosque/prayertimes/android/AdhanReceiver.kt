@@ -26,6 +26,7 @@ class AdhanReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val prayerName = intent.getStringExtra(AlarmManagerAdhanPort.EXTRA_PRAYER_NAME) ?: "Prayer"
         val playSound = intent.getBooleanExtra(AlarmManagerAdhanPort.EXTRA_PLAY_SOUND, false)
+        val durationSeconds = intent.getIntExtra(AlarmManagerAdhanPort.EXTRA_DURATION_SECONDS, 0)
 
         Notifications.createAdhanChannel(context)
 
@@ -46,7 +47,7 @@ class AdhanReceiver : BroadcastReceiver() {
         }
 
         if (playSound) {
-            AdhanPlaybackService.start(context, prayerName)
+            AdhanPlaybackService.start(context, prayerName, durationSeconds)
         }
     }
 }

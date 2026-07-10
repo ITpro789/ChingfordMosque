@@ -38,6 +38,7 @@ data class ScheduledAdhanAlert(
     val date: Date,
     val firesAt: DateTime,
     val playAdhanSound: Boolean,
+    val durationSeconds: Int = 180, // Default 3 minutes
     val label: String = prayer.name,
 )
 
