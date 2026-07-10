@@ -48,7 +48,7 @@ class AdhanNotificationScheduler(
                                 date = schedule.scheduleDate,
                                 firesAt = firesAt,
                                 playAdhanSound = playSound,
-                                durationSeconds = preferences.durationSeconds,
+                                playDua = preferences.playDua,
                             )
                         )
                     }
@@ -67,7 +67,7 @@ class AdhanNotificationScheduler(
                                 date = schedule.scheduleDate,
                                 firesAt = firesAt,
                                 playAdhanSound = playSound,
-                                durationSeconds = preferences.durationSeconds,
+                                playDua = preferences.playDua,
                                 label = label,
                             )
                         )
@@ -90,7 +90,7 @@ class AdhanNotificationScheduler(
                                 date = schedule.scheduleDate,
                                 firesAt = firesAt,
                                 playAdhanSound = playSound,
-                                durationSeconds = preferences.durationSeconds,
+                                playDua = preferences.playDua,
                             )
                         )
                     }

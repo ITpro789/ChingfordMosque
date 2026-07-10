@@ -22,8 +22,7 @@ class AdhanPlaybackService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
     private var mediaPlayer: MediaPlayer? = null
     private val okHttpClient = OkHttpClient()
-    private var durationLimitJob: Job? = null
-    private var durationSeconds: Int = 0
+    private var playDua: Boolean = false
 
     private val volumeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -47,7 +46,7 @@ class AdhanPlaybackService : Service() {
         }
 
         val prayerName = intent?.getStringExtra(AlarmManagerAdhanPort.EXTRA_PRAYER_NAME) ?: "Prayer"
-        durationSeconds = intent?.getIntExtra(AlarmManagerAdhanPort.EXTRA_DURATION_SECONDS, 0) ?: 0
+        playDua = intent?.getBooleanExtra(AlarmManagerAdhanPort.EXTRA_PLAY_DUA, false) ?: false
         
         // Start foreground immediately to prevent being killed
         startForegroundServiceNotification(prayerName, "Checking live stream...")
@@ -144,6 +143,48 @@ class AdhanPlaybackService : Service() {
                 )
                 setDataSource(this@AdhanPlaybackService, uri)
                 setOnCompletionListener { 
+                    if (playDua && !isLiveStream(uri)) {
+                        playDua()
+                    } else {
+                        stopPlaybackAndService()
+                    }
+                }
+                setOnErrorListener { _, _, _ ->
+                    stopPlaybackAndService()
+                    true
+                }
+                prepareAsync()
+                setOnPreparedListener {
+                    start()
+                }
+            }
+        } catch (e: Exception) {
+            stopPlaybackAndService()
+        }
+    }
+
+    private fun isLiveStream(uri: Uri): Boolean {
+        return uri.toString().startsWith("http")
+    }
+
+    private fun playDua() {
+        val rawId = resources.getIdentifier("dua", "raw", packageName)
+        if (rawId == 0) {
+            stopPlaybackAndService()
+            return
+        }
+        val soundUri = Uri.parse("android.resource://$packageName/$rawId")
+        try {
+            mediaPlayer?.release()
+            mediaPlayer = MediaPlayer().apply {
+                setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build()
+                )
+                setDataSource(this@AdhanPlaybackService, soundUri)
+                setOnCompletionListener { 
                     stopPlaybackAndService() 
                 }
                 setOnErrorListener { _, _, _ ->
@@ -153,13 +194,6 @@ class AdhanPlaybackService : Service() {
                 prepareAsync()
                 setOnPreparedListener {
                     start()
-                    if (durationSeconds > 0) {
-                        durationLimitJob?.cancel()
-                        durationLimitJob = serviceScope.launch(Dispatchers.Main) {
-                            delay(durationSeconds * 1000L)
-                            stopPlaybackAndService()
-                        }
-                    }
                 }
             }
         } catch (e: Exception) {
@@ -176,7 +210,6 @@ class AdhanPlaybackService : Service() {
         } finally {
             mediaPlayer = null
         }
-        durationLimitJob?.cancel()
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
@@ -192,10 +225,10 @@ class AdhanPlaybackService : Service() {
         const val ACTION_STOP_PLAYBACK = "com.chingfordmosque.prayertimes.action.STOP_PLAYBACK"
         private const val NOTIFICATION_ID = 1001
         
-        fun start(context: Context, prayerName: String, durationSeconds: Int = 0) {
+        fun start(context: Context, prayerName: String, playDua: Boolean = false) {
             val intent = Intent(context, AdhanPlaybackService::class.java).apply {
                 putExtra(AlarmManagerAdhanPort.EXTRA_PRAYER_NAME, prayerName)
-                putExtra(AlarmManagerAdhanPort.EXTRA_DURATION_SECONDS, durationSeconds)
+                putExtra(AlarmManagerAdhanPort.EXTRA_PLAY_DUA, playDua)
             }
             androidx.core.content.ContextCompat.startForegroundService(context, intent)
         }

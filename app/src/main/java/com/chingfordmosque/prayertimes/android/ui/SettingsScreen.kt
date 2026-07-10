@@ -48,7 +48,7 @@ fun SettingsRoute(viewModel: SettingsViewModel = viewModel()) {
         onThemeSelected = viewModel::setThemeMode,
         onLocalAdhanToggle = viewModel::setLocalAdhan,
         onIqamahOffsetChange = viewModel::setIqamahOffset,
-        onDurationChange = viewModel::setDurationSeconds,
+        onPlayDuaToggle = viewModel::setPlayDua,
     )
 }
 
@@ -64,7 +64,7 @@ fun SettingsScreen(
     onThemeSelected: (ThemeMode) -> Unit,
     onLocalAdhanToggle: (Boolean) -> Unit = {},
     onIqamahOffsetChange: (Int) -> Unit = {},
-    onDurationChange: (Int) -> Unit = {},
+    onPlayDuaToggle: (Boolean) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -79,30 +79,36 @@ fun SettingsScreen(
             fontWeight = FontWeight.SemiBold,
         )
 
-        SectionCard(title = "Azaan timing") {
-            SwitchRow(
-                label = "Use Local Begins Time",
-                supporting = "If disabled, Azaan plays before Mosque Iqamah time",
-                checked = settings.isLocalAdhan,
-                onCheckedChange = onLocalAdhanToggle,
+        SectionCard(title = "Azaan") {
+            RadioRow(
+                label = "Salah Beginning Time",
+                selected = settings.isLocalAdhan,
+                onSelect = { onLocalAdhanToggle(true) }
+            )
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
+            RadioRow(
+                label = "Salah Jammat Time",
+                selected = !settings.isLocalAdhan,
+                onSelect = { onLocalAdhanToggle(false) }
             )
             
             if (!settings.isLocalAdhan) {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
                 NumberRow(
-                    label = "Minutes before Iqamah",
-                    supporting = "How early the Azaan should sound",
+                    label = "Minutes before Jammat (Iqama)",
+                    supporting = "Choose 10 to 30 minutes before Jammat",
                     value = settings.iqamahOffset,
                     onValueChange = onIqamahOffsetChange,
+                    valueRange = 10f..30f
                 )
             }
             
             HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
-            NumberRow(
-                label = "Duration Limit (seconds)",
-                supporting = "Stop Azaan early (e.g. 180 to skip Dua)",
-                value = settings.durationSeconds,
-                onValueChange = onDurationChange,
+            SwitchRow(
+                label = "Dua after azaan",
+                supporting = "Plays an authentic dua MP3 right after the azaan",
+                checked = settings.playDua,
+                onCheckedChange = onPlayDuaToggle,
             )
         }
 
@@ -233,6 +239,7 @@ private fun NumberRow(
     supporting: String?,
     value: Int,
     onValueChange: (Int) -> Unit,
+    valueRange: ClosedFloatingPointRange<Float> = 0f..300f
 ) {
     Column(
         modifier = Modifier
@@ -255,7 +262,7 @@ private fun NumberRow(
             androidx.compose.material3.Slider(
                 value = value.toFloat(),
                 onValueChange = { onValueChange(it.toInt()) },
-                valueRange = 0f..300f,
+                valueRange = valueRange,
                 modifier = Modifier.weight(1f)
             )
             Spacer(modifier = Modifier.width(16.dp))

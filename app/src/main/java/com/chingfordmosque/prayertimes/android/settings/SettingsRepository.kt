@@ -28,7 +28,7 @@ data class AppSettings(
     val themeMode: ThemeMode,
     val isLocalAdhan: Boolean = false,
     val iqamahOffset: Int = 15,
-    val durationSeconds: Int = 180,
+    val playDua: Boolean = false,
 ) {
     /** Project these settings into the core [NotificationPreferences] value. */
     fun toNotificationPreferences(): NotificationPreferences =
@@ -37,7 +37,7 @@ data class AppSettings(
             adhanSoundEnabled,
             isLocalAdhan,
             iqamahOffset,
-            durationSeconds
+            playDua
         )
 
     companion object {
@@ -48,7 +48,7 @@ data class AppSettings(
             themeMode = ThemeMode.SYSTEM,
             isLocalAdhan = false,
             iqamahOffset = 15,
-            durationSeconds = 180,
+            playDua = false,
         )
     }
 }
@@ -92,8 +92,8 @@ class SettingsRepository(context: Context) {
         dataStore.edit { it[IQAMAH_OFFSET] = offset }
     }
 
-    suspend fun setDurationSeconds(seconds: Int) {
-        dataStore.edit { it[DURATION_SECONDS] = seconds }
+    suspend fun setPlayDua(play: Boolean) {
+        dataStore.edit { it[PLAY_DUA] = play }
     }
 
     /** Read the current snapshot synchronously (used once from Application.onCreate). */
@@ -110,7 +110,7 @@ class SettingsRepository(context: Context) {
             themeMode = readThemeMode(),
             isLocalAdhan = this[LOCAL_ADHAN] ?: false,
             iqamahOffset = this[IQAMAH_OFFSET] ?: 15,
-            durationSeconds = this[DURATION_SECONDS] ?: 180,
+            playDua = this[PLAY_DUA] ?: false,
         )
     }
 
@@ -136,6 +136,6 @@ class SettingsRepository(context: Context) {
         private val THEME_MODE = stringPreferencesKey("theme_mode")
         private val LOCAL_ADHAN = booleanPreferencesKey("local_adhan")
         private val IQAMAH_OFFSET = intPreferencesKey("iqamah_offset")
-        private val DURATION_SECONDS = intPreferencesKey("duration_seconds")
+        private val PLAY_DUA = booleanPreferencesKey("play_dua")
     }
 }

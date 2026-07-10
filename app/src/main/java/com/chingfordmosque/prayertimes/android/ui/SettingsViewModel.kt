@@ -68,9 +68,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun setDurationSeconds(seconds: Int) {
+    fun setPlayDua(play: Boolean) {
         viewModelScope.launch {
-            repository.setDurationSeconds(seconds)
+            repository.setPlayDua(play)
             applyNotificationSettings()
         }
     }
