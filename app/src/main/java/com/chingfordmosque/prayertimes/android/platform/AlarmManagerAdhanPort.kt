@@ -102,6 +102,8 @@ class AlarmManagerAdhanPort(
                 putExtra(EXTRA_PRAYER_NAME, alert.label)
                 putExtra(EXTRA_PLAY_SOUND, alert.playAdhanSound)
                 putExtra(EXTRA_PLAY_DUA, alert.playDua)
+                putExtra(EXTRA_AZAAN_VOLUME, alert.azaanVolume)
+                putExtra(EXTRA_SHORT_AZAAN, alert.shortAzaan)
             }
         }
 
@@ -153,5 +155,7 @@ class AlarmManagerAdhanPort(
         const val EXTRA_PRAYER_NAME = "com.chingfordmosque.prayertimes.extra.PRAYER_NAME"
         const val EXTRA_PLAY_SOUND = "com.chingfordmosque.prayertimes.extra.PLAY_SOUND"
         const val EXTRA_PLAY_DUA = "com.chingfordmosque.prayertimes.extra.PLAY_DUA"
+        const val EXTRA_AZAAN_VOLUME = "com.chingfordmosque.prayertimes.extra.AZAAN_VOLUME"
+        const val EXTRA_SHORT_AZAAN = "com.chingfordmosque.prayertimes.extra.SHORT_AZAAN"
     }
 }

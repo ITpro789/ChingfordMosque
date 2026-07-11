@@ -75,6 +75,20 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    fun setAzaanVolume(volume: Int) {
+        viewModelScope.launch {
+            repository.setAzaanVolume(volume)
+            applyNotificationSettings()
+        }
+    }
+
+    fun setShortAzaan(isShort: Boolean) {
+        viewModelScope.launch {
+            repository.setShortAzaan(isShort)
+            applyNotificationSettings()
+        }
+    }
+
     /**
      * Push the latest persisted preferences into the scheduler and re-arm alarms from the
      * cached schedule, if one is loaded. No network fetch is performed.

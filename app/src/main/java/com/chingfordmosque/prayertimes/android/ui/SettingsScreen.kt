@@ -49,6 +49,8 @@ fun SettingsRoute(viewModel: SettingsViewModel = viewModel()) {
         onLocalAdhanToggle = viewModel::setLocalAdhan,
         onIqamahOffsetChange = viewModel::setIqamahOffset,
         onPlayDuaToggle = viewModel::setPlayDua,
+        onAzaanVolumeChange = viewModel::setAzaanVolume,
+        onShortAzaanToggle = viewModel::setShortAzaan,
     )
 }
 
@@ -65,6 +67,8 @@ fun SettingsScreen(
     onLocalAdhanToggle: (Boolean) -> Unit = {},
     onIqamahOffsetChange: (Int) -> Unit = {},
     onPlayDuaToggle: (Boolean) -> Unit = {},
+    onAzaanVolumeChange: (Int) -> Unit = {},
+    onShortAzaanToggle: (Boolean) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -105,10 +109,28 @@ fun SettingsScreen(
             
             HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
             SwitchRow(
+                label = "Short Azaan",
+                supporting = "Plays only 'Allahuakbar Allahuakbar'",
+                checked = settings.shortAzaan,
+                onCheckedChange = onShortAzaanToggle,
+            )
+            
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
+            SwitchRow(
                 label = "Dua after azaan",
                 supporting = "Plays an authentic dua MP3 right after the azaan",
                 checked = settings.playDua,
                 onCheckedChange = onPlayDuaToggle,
+            )
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
+            NumberRow(
+                label = "Azaan Volume (%)",
+                supporting = "Override the phone's physical volume for the Azaan",
+                value = settings.azaanVolume,
+                onValueChange = onAzaanVolumeChange,
+                valueRange = 0f..100f,
+                steps = 9 // 0, 10, 20... 100
             )
         }
 
@@ -239,7 +261,8 @@ private fun NumberRow(
     supporting: String?,
     value: Int,
     onValueChange: (Int) -> Unit,
-    valueRange: ClosedFloatingPointRange<Float> = 0f..300f
+    valueRange: ClosedFloatingPointRange<Float> = 0f..300f,
+    steps: Int = 0
 ) {
     Column(
         modifier = Modifier
@@ -263,6 +286,7 @@ private fun NumberRow(
                 value = value.toFloat(),
                 onValueChange = { onValueChange(it.toInt()) },
                 valueRange = valueRange,
+                steps = steps,
                 modifier = Modifier.weight(1f)
             )
             Spacer(modifier = Modifier.width(16.dp))

@@ -39,6 +39,8 @@ data class ScheduledAdhanAlert(
     val firesAt: DateTime,
     val playAdhanSound: Boolean,
     val playDua: Boolean = false,
+    val azaanVolume: Int = 100,
+    val shortAzaan: Boolean = false,
     val label: String = prayer.name,
 )
 

@@ -29,6 +29,8 @@ data class AppSettings(
     val isLocalAdhan: Boolean = false,
     val iqamahOffset: Int = 15,
     val playDua: Boolean = false,
+    val azaanVolume: Int = 100,
+    val shortAzaan: Boolean = false,
 ) {
     /** Project these settings into the core [NotificationPreferences] value. */
     fun toNotificationPreferences(): NotificationPreferences =
@@ -37,7 +39,9 @@ data class AppSettings(
             adhanSoundEnabled,
             isLocalAdhan,
             iqamahOffset,
-            playDua
+            playDua,
+            azaanVolume,
+            shortAzaan
         )
 
     companion object {
@@ -49,6 +53,8 @@ data class AppSettings(
             isLocalAdhan = false,
             iqamahOffset = 15,
             playDua = false,
+            azaanVolume = 100,
+            shortAzaan = false,
         )
     }
 }
@@ -96,6 +102,14 @@ class SettingsRepository(context: Context) {
         dataStore.edit { it[PLAY_DUA] = play }
     }
 
+    suspend fun setAzaanVolume(volume: Int) {
+        dataStore.edit { it[AZAAN_VOLUME] = volume }
+    }
+
+    suspend fun setShortAzaan(isShort: Boolean) {
+        dataStore.edit { it[SHORT_AZAAN] = isShort }
+    }
+
     /** Read the current snapshot synchronously (used once from Application.onCreate). */
     fun readBlocking(): AppSettings = runBlocking { settings.first() }
 
@@ -111,6 +125,8 @@ class SettingsRepository(context: Context) {
             isLocalAdhan = this[LOCAL_ADHAN] ?: false,
             iqamahOffset = this[IQAMAH_OFFSET] ?: 15,
             playDua = this[PLAY_DUA] ?: false,
+            azaanVolume = this[AZAAN_VOLUME] ?: 100,
+            shortAzaan = this[SHORT_AZAAN] ?: false,
         )
     }
 
@@ -137,5 +153,7 @@ class SettingsRepository(context: Context) {
         private val LOCAL_ADHAN = booleanPreferencesKey("local_adhan")
         private val IQAMAH_OFFSET = intPreferencesKey("iqamah_offset")
         private val PLAY_DUA = booleanPreferencesKey("play_dua")
+        private val AZAAN_VOLUME = intPreferencesKey("azaan_volume")
+        private val SHORT_AZAAN = booleanPreferencesKey("short_azaan")
     }
 }

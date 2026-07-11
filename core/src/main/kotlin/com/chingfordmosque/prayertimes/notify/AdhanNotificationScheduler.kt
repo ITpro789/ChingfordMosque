@@ -49,6 +49,8 @@ class AdhanNotificationScheduler(
                                 firesAt = firesAt,
                                 playAdhanSound = playSound,
                                 playDua = preferences.playDua,
+                                azaanVolume = preferences.azaanVolume,
+                                shortAzaan = preferences.shortAzaan,
                             )
                         )
                     }
@@ -68,6 +70,8 @@ class AdhanNotificationScheduler(
                                 firesAt = firesAt,
                                 playAdhanSound = playSound,
                                 playDua = preferences.playDua,
+                                azaanVolume = preferences.azaanVolume,
+                                shortAzaan = preferences.shortAzaan,
                                 label = label,
                             )
                         )
@@ -91,6 +95,8 @@ class AdhanNotificationScheduler(
                                 firesAt = firesAt,
                                 playAdhanSound = playSound,
                                 playDua = preferences.playDua,
+                                azaanVolume = preferences.azaanVolume,
+                                shortAzaan = preferences.shortAzaan,
                             )
                         )
                     }
